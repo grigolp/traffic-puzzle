@@ -14,7 +14,7 @@ This document defines the JSON structure used to represent the state of a single
   "vehicles":        [ … ],
   "obstacles":       [ … ]
 }
-````
+```
 
 * **levelId**: Unique identifier for the level (e.g. `"level_001"`).
 * **metadata**: Level configuration parameters.
@@ -47,20 +47,22 @@ This document defines the JSON structure used to represent the state of a single
     "height":  integer
   },
   "layout": [
-    [0, 1, 1, …],
-    [0, 0, 1, …],
+    ["0", "-", "-", "+", …],
+    ["0", "0", "0", "|", …],
     …
   ]
 }
 ```
 
 * **dimensions.width** / **.height**: Grid size in cells (columns × rows).
-* **layout**: 2D array of integers:
+* **layout**: 2D array of strings defining road structure:
 
-  * `0` = non-passable (sidewalks, walls)
-  * `1` = road (vehicles may occupy and travel on)
+  * `"0"` = non-passable (sidewalks, walls, buildings)
+  * `"-"` = horizontal road (allows east/west movement only)
+  * `"|"` = vertical road (allows north/south movement only)
+  * `"+"` = intersection (allows movement in all directions)
 
-**Exit cells** are any road cell (`1`) on the outermost row or column (implicitly “touching” the boundary).
+**Exit handling**: Exit nodes are automatically added as a border around the grid during processing. Vehicles exit when they reach these border nodes.
 
 ---
 
@@ -75,7 +77,7 @@ Each vehicle entry:
   "length":       1 | 2,
   "position":     { "x": integer, "y": integer },
   "orientation":  "NORTH" | "SOUTH" | "EAST" | "WEST",
-  "movementRule": "STRAIGHT" | "LEFT" | "RIGHT" | "U_TURN"
+  "movementRule": "STRAIGHT" | "LEFT" | "RIGHT" | "LEFT_U_TURN" | "RIGHT_U_TURN"
 }
 ```
 
@@ -84,16 +86,21 @@ Each vehicle entry:
 * **length**: Number of grid cells occupied (1 for CAR/BULLDOZER, 2 for TRUCK).
 * **position**: Head/front coordinate (0-indexed).
 * **orientation**: Facing direction of the head.
-* **movementRule**: High-level path constraint.
+* **movementRule**: Path constraint determining how the vehicle navigates:
+  * `STRAIGHT`: Continues forward until exit
+  * `LEFT`: Takes first available left turn, then continues to exit
+  * `RIGHT`: Takes first available right turn, then continues to exit
+  * `LEFT_U_TURN`: Makes two consecutive left turns
+  * `RIGHT_U_TURN`: Makes two consecutive right turns
 
-**Occupied cells** are computed by extending from the head position in the orientation:
+**Occupied cells** are computed by extending from the head position opposite to orientation:
 
 | Orientation | Length=1  | Length=2 (cells)    |
 | ----------- | --------- | ------------------- |
 | **NORTH**   | `[{x,y}]` | `[{x,y}, {x, y+1}]` |
 | **SOUTH**   | `[{x,y}]` | `[{x,y}, {x, y-1}]` |
-| **EAST**    | `[{x,y}]` | `[{x,y}, {x+1, y}]` |
-| **WEST**    | `[{x,y}]` | `[{x,y}, {x-1, y}]` |
+| **EAST**    | `[{x,y}]` | `[{x,y}, {x-1, y}]` |
+| **WEST**    | `[{x,y}]` | `[{x,y}, {x+1, y}]` |
 
 ---
 
@@ -119,7 +126,7 @@ All obstacles share these base fields:
 }
 ```
 
-* Blocks all vehicles except **BULLDOZER**, which may remove/push it.
+* Blocks all vehicles except **BULLDOZER**, which may traverse/remove it.
 
 ### 5.2. Traffic Light (Dynamic)
 
@@ -139,9 +146,8 @@ All obstacles share these base fields:
 
 * **currentState**: Which color is currently active.
 * **timing**:
-
-  * **redDuration** / **greenDuration**: Number of turns/seconds each state lasts.
-  * **currentTimer**: Turns/seconds remaining before switching state.
+  * **redDuration** / **greenDuration**: Number of turns each state lasts.
+  * **currentTimer**: Turns remaining before switching state.
 
 ### 5.3. Pedestrian (Dynamic)
 
@@ -155,8 +161,8 @@ All obstacles share these base fields:
 }
 ```
 
-* **crossingTime**: Total turns/seconds required to walk across the road.
-* **currentProgress**: How many turns/seconds have elapsed (0 = start, `crossingTime-1` = nearly complete).
+* **crossingTime**: Total turns required to walk across the road.
+* **currentProgress**: Turns elapsed (0 = start, `crossingTime-1` = nearly complete).
 * Vehicles colliding with a pedestrian cell = level failure.
 
 ---
@@ -171,17 +177,16 @@ All obstacles share these base fields:
         "targetMoves": 12
     },
     "grid": {
-        "dimensions": { "width": 12, "height": 20 },
+        "dimensions": { "width": 10, "height": 8 },
         "layout": [
-            [0,0,1,1,1,1,0,0,1,1,0,0],
-            [0,0,1,0,0,1,0,0,1,0,0,0],
-            [1,1,1,0,0,1,1,1,1,0,0,0],
-            [0,0,1,0,0,1,0,0,1,0,0,0],
-            [1,1,1,1,1,1,1,1,1,1,1,1],
-            [0,0,1,0,0,1,0,0,1,0,0,0],
-            [1,1,1,1,1,1,1,1,1,1,1,1],
-            [0,0,0,0,0,1,0,0,1,0,0,0],
-            [1,1,1,1,1,1,1,1,1,1,1,1]
+            ["0","|","|","0","0","0","|","|","|","0"],
+            ["0","|","|","0","0","0","|","|","|","0"],
+            ["-","+","+","-","-","-","+","+","+","-"],
+            ["-","+","+","-","-","-","+","+","+","-"],
+            ["0","|","|","0","0","0","|","|","|","0"],
+            ["0","|","|","0","0","0","|","|","|","0"],
+            ["-","+","+","-","-","-","+","+","+","-"],
+            ["0","|","|","0","0","0","|","|","|","0"]
         ]
     },
     "vehicles": [
@@ -189,134 +194,32 @@ All obstacles share these base fields:
             "id": "C01",
             "type": "CAR",
             "length": 1,
-            "position": {
-                "x": 2,
-                "y": 3
-            },
-            "orientation": "NORTH",
-            "movementRule": "STRAIGHT"
-        },
-        {
-            "id": "C02",
-            "type": "CAR",
-            "length": 1,
-            "position": {
-                "x": 8,
-                "y": 1
-            },
+            "position": {"x": 2, "y": 2},
             "orientation": "EAST",
-            "movementRule": "RIGHT"
+            "movementRule": "STRAIGHT"
         },
         {
             "id": "T01",
             "type": "TRUCK",
             "length": 2,
-            "position": {
-                "x": 5,
-                "y": 2
-            },
-            "orientation": "SOUTH",
+            "position": {"x": 7, "y": 4},
+            "orientation": "NORTH",
             "movementRule": "LEFT"
-        },
-        {
-            "id": "T02",
-            "type": "TRUCK",
-            "length": 2,
-            "position": {
-                "x": 3,
-                "y": 6
-            },
-            "orientation": "WEST",
-            "movementRule": "U_TURN"
         },
         {
             "id": "B01",
             "type": "BULLDOZER",
             "length": 1,
-            "position": {
-                "x": 7,
-                "y": 4
-            },
-            "orientation": "NORTH",
-            "movementRule": "STRAIGHT"
-        },
-        {
-            "id": "B02",
-            "type": "BULLDOZER",
-            "length": 1,
-            "position": {
-                "x": 2,
-                "y": 8
-            },
-            "orientation": "EAST",
-            "movementRule": "LEFT"
+            "position": {"x": 1, "y": 6},
+            "orientation": "SOUTH",
+            "movementRule": "RIGHT_U_TURN"
         }
     ],
     "obstacles": [
         {
             "id": "OB1",
             "type": "BOULDER",
-            "position": {
-                "x": 6,
-                "y": 4
-            }
-        },
-        {
-            "id": "OB2",
-            "type": "BOULDER",
-            "position": {
-                "x": 9,
-                "y": 6
-            }
-        },
-        {
-            "id": "TL01",
-            "type": "TRAFFIC_LIGHT",
-            "position": {
-                "x": 4,
-                "y": 2
-            },
-            "currentState": "RED",
-            "timing": {
-                "redDuration": 3,
-                "greenDuration": 4,
-                "currentTimer": 2
-            }
-        },
-        {
-            "id": "TL02",
-            "type": "TRAFFIC_LIGHT",
-            "position": {
-                "x": 8,
-                "y": 6
-            },
-            "currentState": "GREEN",
-            "timing": {
-                "redDuration": 5,
-                "greenDuration": 3,
-                "currentTimer": 1
-            }
-        },
-        {
-            "id": "P01",
-            "type": "PEDESTRIAN",
-            "position": {
-                "x": 3,
-                "y": 5
-            },
-            "crossingTime": 7,
-            "currentProgress": 3
-        },
-        {
-            "id": "P02",
-            "type": "PEDESTRIAN",
-            "position": {
-                "x": 10,
-                "y": 6
-            },
-            "crossingTime": 5,
-            "currentProgress": 0
+            "position": {"x": 5, "y": 3}
         }
     ]
 }
-```
