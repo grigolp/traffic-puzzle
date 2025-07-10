@@ -1,8 +1,14 @@
 from enum import Enum
 
 class CellType(Enum):
-    NON_PASSABLE = 0
-    ROAD = 1
+    NON_PASSABLE = "0"
+    HORIZONTAL_ROAD = "-"
+    VERTICAL_ROAD = "|"
+    INTERSECTION = "+"
+    
+    @property
+    def is_road(self):
+        return self != CellType.NON_PASSABLE
 
 class Orientation(Enum):
     NORTH = "NORTH"

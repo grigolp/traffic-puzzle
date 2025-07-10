@@ -53,5 +53,5 @@ class RoadGraph:
     def add_node(self, node: Node):
         """Add node to graph and check if it's an exit"""
         self.nodes[node.id] = node
-        if node.cell_type == CellType.ROAD and self.is_exit_position(node.position):
+        if node.cell_type.is_road and self.is_exit_position(node.position):
             self.exit_positions.add(node.position)
