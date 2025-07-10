@@ -14,6 +14,10 @@ class CellType(Enum):
     @property
     def is_exit(self):
         return self == CellType.EXIT
+    
+    @property
+    def is_intersection(self):
+        return self == CellType.INTERSECTION
 
 class Orientation(Enum):
     NORTH = "NORTH"

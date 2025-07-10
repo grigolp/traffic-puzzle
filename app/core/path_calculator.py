@@ -80,17 +80,25 @@ class PathCalculator:
                     return PathInfo(exit_path=[], exit_point=None, valid=False)
                 visited.add(state)
                 
-                # Check if we can make the required turn here
-                if current_orientation in current_node.neighbors:
-                    next_node_id = current_node.neighbors[current_orientation].get(turn_direction)
-                    if next_node_id:
-                        # Make the turn
-                        current_node = graph.nodes[next_node_id]
-                        current_orientation = self.turn_mappings[current_orientation][turn_direction]
-                        path.append(current_node.id)
-                        turns_made += 1
-                        turn_found = True
-                        continue
+                # Checks if the required turn can be made from the current node.
+                #
+                # A vehicle must first move one step forward to initiate a turn.
+                # Additionally, a turn is prohibited if the previous node was also an intersection.
+                # This rule prevents illegal U-turns within the same multi-lane intersection.
+                #
+                # To check the previous node, we access the path at index -2, because the
+                # last element (path[-1]) is the current node.
+                if len(path) >= 2 and not graph.nodes[path[-2]].cell_type.is_intersection:
+                    if current_orientation in current_node.neighbors:
+                        next_node_id = current_node.neighbors[current_orientation].get(turn_direction)
+                        if next_node_id:
+                            # Make the turn
+                            next_node = graph.nodes[next_node_id]
+                            current_orientation = self.turn_mappings[current_orientation][turn_direction]
+                            path.append(next_node.id)
+                            turns_made += 1
+                            turn_found = True
+                            continue
                 
                 # Can't turn here, continue straight
                 if current_orientation not in current_node.neighbors:
@@ -103,9 +111,9 @@ class PathCalculator:
                 current_node = graph.nodes[next_node_id]
                 path.append(current_node.id)
                 
-                # Check if we've reached an exit before completing turns
+                # Check if we've reached an exit before completing turns (Successful exit)
                 if graph.is_exit_position(current_node):
-                    return PathInfo(exit_path=[], exit_point=None, valid=False)
+                    return PathInfo(exit_path=path, exit_point=current_node.position, valid=True)
         
         # After making all required turns, continue straight to exit
         return self._continue_straight_to_exit(graph, current_node, current_orientation, path)
