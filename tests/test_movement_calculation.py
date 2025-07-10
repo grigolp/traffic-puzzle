@@ -187,8 +187,15 @@ def test_path_calculator_with_multi_lane_roads():
         {
             "name": "Complex turn through multiple intersections",
             "position": Position(2, 3),
-            "orientation": Orientation.WEST,
+            "orientation": Orientation.EAST,
             "movement": MovementRule.RIGHT_U_TURN,
+            "expected": "Should navigate through 2-lane intersection for U-turn"
+        },
+        {
+            "name": "Complex turn through multiple intersections",
+            "position": Position(2, 3),
+            "orientation": Orientation.EAST,
+            "movement": MovementRule.LEFT_U_TURN,
             "expected": "Should navigate through 2-lane intersection for U-turn"
         }
     ]
