@@ -11,10 +11,12 @@ The validator will accept level data in a structured JSON format.
 **grid:**
 - `dimensions`: `{ "width": <int>, "height": <int> }`
 - `layout`: A 2D array where each cell defines its static type:
-  - `0`: non-passable (sidewalks, walls)
-  - `1`: road (vehicles may occupy and travel on)
+  - `"0"`: non-passable (sidewalks, walls, buildings)
+  - `"-"`: horizontal road
+  - `"|"`: vertical road  
+  - `"+"`: intersection (where roads meet)
 
-Exit cells are any road cell (`1`) on the outermost row or column.
+Exit points are handled by adding a border of exit nodes around the grid during processing.
 
 **vehicles:** An array of vehicle objects, each with:
 - `id`: A unique string identifier (e.g., "C01", "T02", "B01")
@@ -22,7 +24,7 @@ Exit cells are any road cell (`1`) on the outermost row or column.
 - `length`: 1 for CAR/BULLDOZER, 2 for TRUCK
 - `position`: A single {x, y} coordinate representing the head/front position
 - `orientation`: NORTH, SOUTH, EAST, or WEST
-- `movementRule`: STRAIGHT, LEFT, RIGHT, or U_TURN
+- `movementRule`: STRAIGHT, LEFT, RIGHT, LEFT_U_TURN, or RIGHT_U_TURN
 
 **obstacles:** An array of obstacle objects including:
 - `BOULDER` (static): blocks all vehicles except BULLDOZER
@@ -32,14 +34,35 @@ Exit cells are any road cell (`1`) on the outermost row or column.
 
 ### 2.2. Internal Path Calculation
 
-For any vehicle to exit, a complete, cell-by-cell path must be calculated from its current position to an EXIT_POINT.
+The validator uses a pre-calculated graph representation where all possible paths are computed at initialization:
 
-**Pathfinding Logic:** A pathfinding algorithm will find a route to a valid EXIT_POINT.
+**Graph Representation:**
+- Every grid cell becomes a node
+- Each node stores neighbor relationships based on orientation
+- All possible exit paths are pre-calculated for O(1) lookup
+
+**Path Lookup Structure:**
+```
+PathLookup[node_id][orientation][movement_rule] = {
+    "exit_path": [node_1, node_2, ..., exit_node],
+    "exit_point": (x, y),
+    "valid": True/False
+}
+```
 
 **Path Constraints:**
 - The generated path must conform to the vehicle's specified `movementRule`
-- All cells in the path must be traversable (ROAD or EXIT_POINT)
+- Horizontal roads only allow east/west movement
+- Vertical roads only allow north/south movement
+- Intersections allow turns in any direction
 - All cells in the path must be clear of other vehicles
+
+**Movement Rules:**
+- `STRAIGHT`: Continue forward until exit
+- `LEFT`: Continue until first available left turn, take it, then continue to exit
+- `RIGHT`: Continue until first available right turn, take it, then continue to exit
+- `LEFT_U_TURN`: Make two consecutive left turns to reverse direction
+- `RIGHT_U_TURN`: Make two consecutive right turns to reverse direction
 
 **Obstacle Interaction:**
 - For CAR and TRUCK vehicles, the path must also be clear of any BOULDERs
@@ -61,29 +84,32 @@ A "State" is a complete snapshot of the puzzle at a specific moment, defined by 
 
 A state transition occurs when one vehicle successfully exits the grid.
 
-1. **Identify Possible Moves:** From a given state S, check every active vehicle to see if it has a valid, clear exit path according to the rules in Section 2.2
-2. **Generate New States (Branching):** For each vehicle V that has a valid exit path, a new potential state S' is created:
+1. **Identify Possible Moves:** From a given state S, lookup pre-calculated paths for each active vehicle
+2. **Check Path Validity:** Verify all cells in the path are clear (or only contain boulders for bulldozers)
+3. **Generate New States (Branching):** For each vehicle V that has a clear exit path, create a new state S':
    - In S', V is removed from the set of active vehicles
-   - If V was a BULLDOZER and its path crossed a BOULDER, that boulder is removed from the set of active boulders in S'
-   - Each new state S' represents a branch in the search for a solution
+   - If V was a BULLDOZER and its path crossed a BOULDER, that boulder is removed in S'
+   - Each new state S' represents a branch in the search
 
 ### 2.5. Solvability Determination
 
-The validator determines solvability by exploring the state-space graph, starting from the initial configuration. The core logic is that if multiple vehicles can exit from a single state, each choice creates a different future reality for the puzzle, and we must be prepared to explore them.
+The validator determines solvability by exploring the state-space graph with efficient path lookups.
 
 - **Initial State:** The configuration defined by the input level data
 - **Goal State:** Any state where the set of active vehicles is empty
 
 **Search Process:**
 1. Start with the initialState
-2. In the current state, find all vehicles that can make a valid exit move
-3. If no vehicles can move, this branch of the search is a dead end
-4. If one or more vehicles can move, this creates multiple branches. The process is applied recursively to each new state generated
-5. To prevent infinite loops (e.g., returning to a previous board layout, thiis should not be possible for current problem statement), the validator must keep track of states it has already analyzed
-6. If any branch leads to the goalState, the level is SOLVABLE
-7. If all possible branches have been explored and none lead to the goalState, the level is UNSOLVABLE
+2. For each vehicle, lookup its pre-calculated exit path (O(1) operation)
+3. Check if the path is clear in the current state
+4. If no vehicles can move, this branch is a dead end
+5. If vehicles can move, create new states for each possibility
+6. Track visited states to prevent loops
+7. If any branch reaches the goalState, the level is SOLVABLE
+8. If all branches are explored without reaching goalState, level is UNSOLVABLE
 
 **Output:**
 - `status`: SOLVABLE or UNSOLVABLE
 - `solutionPath`: If solvable, an ordered list of vehicle IDs that exited
 - `reason`: If unsolvable (e.g., "Deadlock reached: Vehicles A, B, C are blocked")
+```

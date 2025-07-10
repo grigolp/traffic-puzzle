@@ -14,10 +14,8 @@
 
 **Headers**  
 ```
-
 Content-Type: application/json
-
-````
+```
 
 **Body Schema**  
 ```jsonc
@@ -32,16 +30,16 @@ Content-Type: application/json
       "width":     integer,                  // columns (1–50)
       "height":    integer                   // rows (1–50)
     },
-    "layout":       number[][]               // 2D array: 0=non-passable, 1=road
+    "layout":       string[][]               // 2D array of road types
   },
   "vehicles": [
     {
-      "id":           "string",              // e.g. “C01”, “T02”, “B01”
+      "id":           "string",              // e.g. "C01", "T02", "B01"
       "type":         "CAR" | "TRUCK" | "BULLDOZER",
       "length":       1 | 2,                  // cells occupied
       "position":     { "x": integer, "y": integer },
       "orientation":  "NORTH" | "SOUTH" | "EAST" | "WEST",
-      "movementRule": "STRAIGHT" | "LEFT" | "RIGHT" | "U_TURN"
+      "movementRule": "STRAIGHT" | "LEFT" | "RIGHT" | "LEFT_U_TURN" | "RIGHT_U_TURN"
     }
   ],
   "obstacles": [
@@ -75,7 +73,20 @@ Content-Type: application/json
     }
   ]
 }
-````
+```
+
+**Grid Layout Values:**
+- `"0"` = non-passable (buildings, walls)
+- `"-"` = horizontal road
+- `"|"` = vertical road
+- `"+"` = intersection
+
+**Movement Rules:**
+- `STRAIGHT`: Vehicle continues forward until exit
+- `LEFT`: Vehicle takes first available left turn
+- `RIGHT`: Vehicle takes first available right turn
+- `LEFT_U_TURN`: Vehicle makes two consecutive left turns
+- `RIGHT_U_TURN`: Vehicle makes two consecutive right turns
 
 ---
 
@@ -107,7 +118,7 @@ Content-Type: application/json
     {
       "blocked":   "T01",
       "blockedBy": "B01",
-      "reason":    "B01 blocks T01’s turning path"
+      "reason":    "B01 blocks T01's turning path"
     }
   ],
   "reason":            "Deadlock: no remaining exit paths"
@@ -143,7 +154,7 @@ Content-Type: application/json
       },
       {
         "field":   "grid.layout[2][5]",
-        "message": "Cell value must be 0 or 1"
+        "message": "Cell value must be one of: '0', '-', '|', '+'"
       }
     ]
   }
@@ -173,10 +184,10 @@ Content-Type: application/json
 | 422  | `VALIDATION_ERROR`            | JSON schema violations or enum mismatches     |
 | 422  | `INVALID_LEVEL_DATA`          | Logical inconsistency (e.g. vehicle off-road) |
 | 422  | `INVALID_GRID_DIMENSIONS`     | Width/height out of allowed range (1–50)      |
-| 422  | `INVALID_VEHICLE_PLACEMENT`   | Vehicle off-road or out of bounds             |
-| 422  | `INVALID_OBSTACLE_PLACEMENT`  | Obstacle off-road or out of bounds            |
+| 422  | `INVALID_VEHICLE_PLACEMENT`   | Vehicle not on a road cell                    |
+| 422  | `INVALID_OBSTACLE_PLACEMENT`  | Obstacle not on a road cell                   |
 | 422  | `OVERLAPPING_OBJECTS`         | Two or more objects share the same cell       |
-| 422  | `INVALID_VEHICLE_ORIENTATION` | Vehicle initially faces a wall                |
+| 422  | `INVALID_VEHICLE_ORIENTATION` | Vehicle orientation incompatible with road type|
 | 500  | `SERVER_ERROR`                | Unexpected server-side failure                |
 
 ---
@@ -194,11 +205,11 @@ curl -X POST http://localhost:8000/api/v1/validate \
     "grid": {
       "dimensions": {"width":5,"height":5},
       "layout": [
-        [1,1,1,1,1],
-        [1,0,0,0,1],
-        [1,1,1,1,1],
-        [1,0,0,0,1],
-        [1,1,1,1,1]
+        ["-","-","-","-","-"],
+        ["0","0","0","0","|"],
+        ["-","-","+","-","+"],
+        ["|","0","0","0","|"],
+        ["+","-","-","-","+"]
       ]
     },
     "vehicles": [{
@@ -231,11 +242,11 @@ curl -X POST http://localhost:8000/api/v1/validate \
     "grid": {
       "dimensions": {"width":5,"height":5},
       "layout": [
-        [1,1,1,1,1],
-        [1,0,0,0,1],
-        [1,1,1,1,1],
-        [1,0,0,0,1],
-        [1,1,1,1,1]
+        ["+","-","-","-","+"],
+        ["|","0","0","0","|"],
+        ["+","-","+","-","+"],
+        ["|","0","0","0","|"],
+        ["+","-","-","-","+"]
       ]
     },
     "vehicles": [
@@ -265,12 +276,12 @@ curl -X POST http://localhost:8000/api/v1/validate \
     {
       "blocked":   "C01",
       "blockedBy": "C02",
-      "reason":    "C02 blocks C01’s straight path to exit"
+      "reason":    "C02 blocks C01's straight path to exit"
     },
     {
       "blocked":   "C02",
       "blockedBy": "C01",
-      "reason":    "C01 blocks C02’s straight path to exit"
+      "reason":    "C01 blocks C02's straight path to exit"
     }
   ],
   "reason":          "Deadlock: no alternative paths"
