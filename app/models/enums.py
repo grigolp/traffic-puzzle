@@ -5,10 +5,15 @@ class CellType(Enum):
     HORIZONTAL_ROAD = "-"
     VERTICAL_ROAD = "|"
     INTERSECTION = "+"
+    EXIT = "E"
     
     @property
     def is_road(self):
         return self != CellType.NON_PASSABLE
+    
+    @property
+    def is_exit(self):
+        return self == CellType.EXIT
 
 class Orientation(Enum):
     NORTH = "NORTH"

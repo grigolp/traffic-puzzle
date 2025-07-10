@@ -45,13 +45,11 @@ class RoadGraph:
         node_id = self.get_node_id(x, y)
         return self.nodes.get(node_id)
     
-    def is_exit_position(self, pos: Position) -> bool:
-        """Check if position is on the grid boundary"""
-        return (pos.x == 0 or pos.x == self.width - 1 or 
-                pos.y == 0 or pos.y == self.height - 1)
-    
+    def is_exit_position(self, node: Node):
+        return node.cell_type.is_exit
+
     def add_node(self, node: Node):
         """Add node to graph and check if it's an exit"""
         self.nodes[node.id] = node
-        if node.cell_type.is_road and self.is_exit_position(node.position):
+        if node.cell_type.is_exit:
             self.exit_positions.add(node.position)
