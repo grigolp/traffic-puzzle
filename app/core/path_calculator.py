@@ -63,7 +63,7 @@ class PathCalculator:
                            orientation: Orientation, turn_direction: Direction, 
                            num_turns: int) -> PathInfo:
         """Calculate path that requires making specified number of turns"""
-        path = []
+        path = [start_node.id]
         current_node = start_node
         current_orientation = orientation
         visited: Set[Tuple[str, Orientation, int]] = set()
