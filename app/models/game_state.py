@@ -1,7 +1,7 @@
 from typing import Dict, List, Set, Optional, Tuple
 from dataclasses import dataclass
 from .vehicles import Vehicle
-from .obstacles import Obstacle, TrafficLight, Pedestrian
+from .obstacles import Obstacle
 from .graph import Position, RoadGraph
 
 
