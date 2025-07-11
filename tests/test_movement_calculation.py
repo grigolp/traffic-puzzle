@@ -157,8 +157,22 @@ def test_path_calculator_with_multi_lane_roads():
             "expected": "Should turn north into 3-lane road"
         },
         {
+            "name": "Test RIGHT turns on intersections",
+            "position": Position(8, 4),
+            "orientation": Orientation.NORTH,
+            "movement": MovementRule.RIGHT,
+            "expected": "Should go straight"
+        },
+        {
             "name": "RIGHT turn from 3-lane to 2-lane road",
             "position": Position(8, 5),
+            "orientation": Orientation.NORTH,
+            "movement": MovementRule.RIGHT,
+            "expected": "Should turn east into 2-lane road"
+        },
+        {
+            "name": "RIGHT turn from 3-lane to 2-lane road",
+            "position": Position(8, 6),
             "orientation": Orientation.NORTH,
             "movement": MovementRule.RIGHT,
             "expected": "Should turn east into 2-lane road"
