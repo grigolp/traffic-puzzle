@@ -193,7 +193,7 @@ All obstacles share these base fields:
         {
             "id": "C01",
             "type": "CAR",
-            "length": 1,
+            "length": 2,
             "position": {"x": 2, "y": 2},
             "orientation": "EAST",
             "movementRule": "STRAIGHT"

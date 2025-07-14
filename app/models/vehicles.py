@@ -15,7 +15,7 @@ class VehicleType(Enum):
 class Vehicle:
     id: str
     type: VehicleType
-    length: int  # 1 for CAR/BULLDOZER, 2 for TRUCK
+    length: int  # 2 for CAR/BULLDOZER, 4 for TRUCK
     position: Position  # Head/front position
     orientation: Orientation
     movement_rule: MovementRule
@@ -26,17 +26,23 @@ class Vehicle:
         The head is at self.position, and the body extends backward based on orientation.
         """
         cells = [self.position]
+
+        # Determine the directional offsets based on orientation.
+        if self.orientation == Orientation.NORTH:
+            delta_x, delta_y = 0, 1
+        elif self.orientation == Orientation.SOUTH:
+            delta_x, delta_y = 0, -1
+        elif self.orientation == Orientation.EAST:
+            delta_x, delta_y = -1, 0
+        elif self.orientation == Orientation.WEST:
+            delta_x, delta_y = 1, 0
+        else:
+            raise ValueError("Invalid orientation")
         
-        if self.length == 2:  # TRUCK
-            # Second cell is behind the head based on orientation
-            if self.orientation == Orientation.NORTH:
-                cells.append(Position(self.position.x, self.position.y + 1))
-            elif self.orientation == Orientation.SOUTH:
-                cells.append(Position(self.position.x, self.position.y - 1))
-            elif self.orientation == Orientation.EAST:
-                cells.append(Position(self.position.x - 1, self.position.y))
-            elif self.orientation == Orientation.WEST:
-                cells.append(Position(self.position.x + 1, self.position.y))
+        # Add cells extending from the head based on vehicle length.
+        for i in range(1, self.length):
+            cells.append(Position(self.position.x + delta_x * i,
+                      self.position.y + delta_y * i))
         
         return cells
     
