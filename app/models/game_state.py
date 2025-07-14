@@ -1,8 +1,8 @@
 from typing import Dict, List, Set, Optional, Tuple
 from dataclasses import dataclass
-from .vehicles import Vehicle
-from .obstacles import Obstacle
-from .graph import Position, RoadGraph
+from models.vehicles import Vehicle
+from models.obstacles import Obstacle
+from models.graph import Position, RoadGraph
 
 
 @dataclass

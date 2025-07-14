@@ -1,6 +1,6 @@
 from typing import List
-from ..models.enums import CellType, Orientation, Direction
-from ..models.graph import RoadGraph, Node, Position
+from models.enums import CellType, Orientation, Direction
+from models.graph import RoadGraph, Node, Position
 
 class GraphBuilder:
     """Builds graph structure from grid layout"""

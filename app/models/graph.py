@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from typing import Dict, Optional, Set
-from .enums import CellType, Orientation, Direction, MovementRule
+from models.enums import CellType, Orientation, Direction, MovementRule
 
 
 @dataclass
