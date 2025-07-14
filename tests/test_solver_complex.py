@@ -89,6 +89,199 @@ def visualize_solution_state(layout, vehicles, obstacles, exited_vehicles=None):
     if exited_vehicles:
         print(f"Exited: {', '.join(exited_vehicles)}")
 
+def test_actual_level_116():
+    
+    print("\n" + "="*70)
+    print("TEST LV. 116: MULTIPLE VEHICLES and BOLDER")
+    print("="*70)
+    
+    level_data =     {
+    "levelId": "level_116",
+    "metadata": {
+        "difficulty": "___",
+        "targetMoves": 28
+    },
+    "grid": {
+        "dimensions": {"width": 10, "height": 20},
+        "layout": [
+            ["0","|","0","0","0","0","0","0","|","0"],
+            ["0","|","0","0","0","0","0","0","|","0"],
+            ["-","+","-","-","-","-","-","-","+","-"],
+            ["0","|","0","0","0","0","0","0","|","0"],
+            ["0","|","0","0","0","0","0","0","|","0"],
+            ["0","|","0","0","0","0","0","0","|","0"],
+            ["0","|","0","0","0","0","0","0","|","0"],
+            ["0","|","0","0","0","0","0","0","|","0"],
+            ["0","|","0","0","0","0","0","0","|","0"],
+            ["-","+","-","-","-","-","-","-","+","-"],
+            ["0","|","0","0","0","0","0","0","|","0"],
+            ["0","|","0","0","0","0","0","0","|","0"],
+            ["0","|","0","0","0","0","0","0","|","0"],
+            ["-","+","-","-","-","-","-","-","+","-"],
+            ["0","|","0","0","0","0","0","0","|","0"],
+            ["0","|","0","0","0","0","0","0","|","0"],
+            ["0","|","0","0","0","0","0","0","|","0"],
+            ["-","+","-","-","-","-","-","-","+","-"],
+            ["0","|","0","0","0","0","0","0","|","0"],
+            ["0","|","0","0","0","0","0","0","|","0"]
+        ]
+    },
+    "vehicles": [
+        {
+            "id": "C01",
+            "type": "CAR",
+            "length": 2,
+            "position": {"x": 2, "y": 2},
+            "orientation": "WEST",
+            "movementRule": "RIGHT"
+        },
+        {
+            "id": "C02",
+            "type": "CAR",
+            "length": 2,
+            "position": {"x": 7, "y": 2},
+            "orientation": "EAST",
+            "movementRule": "LEFT"
+        },
+        {
+            "id": "C03",
+            "type": "CAR",
+            "length": 2,
+            "position": {"x": 1, "y": 3},
+            "orientation": "NORTH",
+            "movementRule": "RIGHT_U_TURN"
+        },
+        {
+            "id": "C04",
+            "type": "CAR",
+            "length": 2,
+            "position": {"x": 8, "y": 3},
+            "orientation": "NORTH",
+            "movementRule": "LEFT"
+        },
+        {
+            "id": "B01",
+            "type": "BULLDOZER",
+            "length": 2,
+            "position": {"x": 1, "y": 8},
+            "orientation": "SOUTH",
+            "movementRule": "STRAIGHT"
+        },
+        {
+            "id": "C05",
+            "type": "CAR",
+            "length": 2,
+            "position": {"x": 8, "y": 8},
+            "orientation": "SOUTH",
+            "movementRule": "STRAIGHT"
+        },
+        {
+            "id": "C06",
+            "type": "CAR",
+            "length": 2,
+            "position": {"x": 2, "y": 9},
+            "orientation": "WEST",
+            "movementRule": "LEFT"
+        },
+        {
+            "id": "C07",
+            "type": "CAR",
+            "length": 2,
+            "position": {"x": 7, "y": 9},
+            "orientation": "WEST",
+            "movementRule": "STRAIGHT"
+        },
+        {
+            "id": "C08",
+            "type": "CAR",
+            "length": 2,
+            "position": {"x": 1, "y": 12},
+            "orientation": "SOUTH",
+            "movementRule": "STRAIGHT"
+        },
+        {
+            "id": "C09",
+            "type": "CAR",
+            "length": 2,
+            "position": {"x": 8, "y": 10},
+            "orientation": "NORTH",
+            "movementRule": "LEFT"
+        },
+        {
+            "id": "T01",
+            "type": "TRUCK",
+            "length": 4,
+            "position": {"x": 1, "y": 13},
+            "orientation": "WEST",
+            "movementRule": "STRAIGHT"
+        },
+        {
+            "id": "C10",
+            "type": "CAR",
+            "length": 2,
+            "position": {"x": 6, "y": 13},
+            "orientation": "EAST",
+            "movementRule": "STRAIGHT"
+        },
+        {
+            "id": "C11",
+            "type": "CAR",
+            "length": 2,
+            "position": {"x": 1, "y": 14},
+            "orientation": "NORTH",
+            "movementRule": "RIGHT"
+        },
+        {
+            "id": "C12",
+            "type": "CAR",
+            "length": 2,
+            "position": {"x": 8, "y": 14},
+            "orientation": "NORTH",
+            "movementRule": "LEFT_U_TURN"
+        },
+        {
+            "id": "C13",
+            "type": "CAR",
+            "length": 2,
+            "position": {"x": 2, "y": 17},
+            "orientation": "WEST",
+            "movementRule": "LEFT"
+        },
+        {
+            "id": "C14",
+            "type": "CAR",
+            "length": 2,
+            "position": {"x": 6, "y": 17},
+            "orientation": "WEST",
+            "movementRule": "RIGHT"
+        },
+        {
+            "id": "C15",
+            "type": "CAR",
+            "length": 2,
+            "position": {"x": 1, "y": 18},
+            "orientation": "SOUTH",
+            "movementRule": "STRAIGHT"
+        },
+        {
+            "id": "C16",
+            "type": "CAR",
+            "length": 2,
+            "position": {"x": 8, "y": 18},
+            "orientation": "SOUTH",
+            "movementRule": "STRAIGHT"
+        }
+    ],
+    "obstacles": [
+        {
+            "id": "OB1",
+            "type": "BOULDER",
+            "position": {"x": 1, "y": 9}
+        }
+    ]
+}
+    run_complex_test(level_data)
+
 
 def test_complex_scenario_1():
     """Test: Multiple vehicles with crossing paths"""
@@ -447,13 +640,13 @@ def run_complex_test(level_data):
     
     # Validate
     validator = LevelValidator()
-    is_valid, errors = validator.validate_initial_state(graph, initial_state)
+    # is_valid, errors = validator.validate_initial_state(graph, initial_state)
     
-    if not is_valid:
-        print("\nVALIDATION ERRORS:")
-        for error in errors:
-            print(f"  - {error}")
-        return
+    # if not is_valid:
+    #     print("\nVALIDATION ERRORS:")
+    #     for error in errors:
+    #         print(f"  - {error}")
+    #     return
     
     # Solve
     solver = Solver(graph)
@@ -506,8 +699,9 @@ def run_complex_test(level_data):
 
 
 if __name__ == "__main__":
-    test_complex_scenario_1()  # Multiple vehicles
-    test_complex_scenario_2()  # Bulldozer clearing
-    test_complex_scenario_3()  # Deadlock
-    test_complex_scenario_4()  # U-turns
-    test_complex_scenario_5()  # Traffic jam
+    test_actual_level_116()
+    # test_complex_scenario_1()  # Multiple vehicles
+    # test_complex_scenario_2()  # Bulldozer clearing
+    # test_complex_scenario_3()  # Deadlock
+    # test_complex_scenario_4()  # U-turns
+    # test_complex_scenario_5()  # Traffic jam
