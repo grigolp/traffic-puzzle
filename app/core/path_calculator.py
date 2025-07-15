@@ -111,9 +111,9 @@ class PathCalculator:
                 current_node = graph.nodes[next_node_id]
                 path.append(current_node.id)
                 
-                # Check if we've reached an exit before completing turns (Successful exit)
+                # Check if we've reached an exit before completing turns (Unsuccessful exit)
                 if graph.is_exit_position(current_node):
-                    return PathInfo(exit_path=path, exit_point=current_node.position, valid=True)
+                    return PathInfo(exit_path=[], exit_point=None, valid=False)
         
         # After making all required turns, continue straight to exit
         return self._continue_straight_to_exit(graph, current_node, current_orientation, path)
