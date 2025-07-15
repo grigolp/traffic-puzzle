@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from typing import List, Optional
-from .graph import Position
+from models.graph import Position
 
 @dataclass
 class PathInfo:

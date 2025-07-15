@@ -1,8 +1,8 @@
 from dataclasses import dataclass
 from typing import List, Set
 from enum import Enum
-from .graph import Position
-from .enums import Orientation, MovementRule
+from models.graph import Position
+from models.enums import Orientation, MovementRule
 
 
 class VehicleType(Enum):

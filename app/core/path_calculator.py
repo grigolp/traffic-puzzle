@@ -1,7 +1,7 @@
 from typing import Dict, Set, Tuple
-from ..models.enums import Orientation, MovementRule, Direction, CellType
-from ..models.graph import RoadGraph, Node
-from ..models.path import PathInfo
+from models.enums import Orientation, MovementRule, Direction, CellType
+from models.graph import RoadGraph, Node
+from models.path import PathInfo
 
 class PathCalculator:
     """Calculates all possible paths for movement rules"""

@@ -1,10 +1,10 @@
 from typing import Dict, List, Tuple
-from ..models.graph import RoadGraph, Position
-from ..models.vehicles import Vehicle
-from ..models.obstacles import obstacle_from_dict
-from ..models.game_state import GameState
-from ..core.graph_builder import GraphBuilder
-from ..core.path_calculator import PathCalculator
+from models.graph import RoadGraph, Position
+from models.vehicles import Vehicle
+from models.obstacles import obstacle_from_dict
+from models.game_state import GameState
+from core.graph_builder import GraphBuilder
+from core.path_calculator import PathCalculator
 
 
 class LevelLoader:

@@ -1,10 +1,15 @@
 import sys
 from pathlib import Path
-sys.path.append(str(Path(__file__).parent.parent))
 
-from app.core.graph_builder import GraphBuilder
-from app.models.graph import Position
-from app.models.enums import Orientation, Direction, CellType
+project_root = Path(__file__).parent.parent
+sys.path.append(str(project_root))
+
+app_dir = project_root / 'app'
+sys.path.append(str(app_dir))
+
+from core.graph_builder import GraphBuilder # type: ignore
+from models.graph import Position # type: ignore
+from models.enums import Orientation, Direction, CellType # type: ignore
 
 def test_graph_building():
     """Test graph building and neighbor relationships"""

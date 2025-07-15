@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from typing import Optional, Dict, Any
 from enum import Enum
-from .graph import Position
+from models.graph import Position
 
 
 class ObstacleType(Enum):

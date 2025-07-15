@@ -1,15 +1,21 @@
 import sys
 from pathlib import Path
-sys.path.append(str(Path(__file__).parent.parent))
 
-from app.services.level_loader import LevelLoader
-from app.services.validator import LevelValidator
-from app.core.solver import Solver
-from app.models.graph import Position
-from app.models.enums import Orientation, MovementRule
-from app.models.vehicles import Vehicle, VehicleType
-from app.models.obstacles import Boulder
-from app.models.game_state import GameState
+project_root = Path(__file__).parent.parent
+sys.path.append(str(project_root))
+
+app_dir = project_root / 'app'
+sys.path.append(str(app_dir))
+
+
+from services.level_loader import LevelLoader # type: ignore
+from services.validator import LevelValidator # type: ignore
+from core.solver import Solver # type: ignore
+from models.graph import Position # type: ignore
+from models.enums import Orientation, MovementRu # type: ignore
+from models.vehicles import Vehicle, VehicleType # type: ignore
+from models.obstacles import Boulder # type: ignore
+from models.game_state import GameState # type: ignore
 
 
 def print_grid_visualization(layout):

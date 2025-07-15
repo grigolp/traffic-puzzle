@@ -1,10 +1,10 @@
 from typing import List, Dict, Set, Tuple, Optional
 from collections import deque
 from dataclasses import dataclass
-from ..models.graph import RoadGraph
-from ..models.game_state import GameState
-from ..models.vehicles import Vehicle
-from ..models.path import PathInfo
+from models.graph import RoadGraph
+from models.game_state import GameState
+from models.vehicles import Vehicle
+from models.path import PathInfo
 
 
 @dataclass

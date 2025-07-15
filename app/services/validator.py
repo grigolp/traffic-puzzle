@@ -1,8 +1,10 @@
-from typing import List, Tuple, Optional, Set
-from ..models.graph import RoadGraph, Position
-from ..models.game_state import GameState
-from ..models.vehicles import Vehicle
-from ..models.enums import CellType
+from typing import List, Tuple, Dict, Any
+from models.graph import RoadGraph, Position
+from models.game_state import GameState
+from models.vehicles import Vehicle
+from models.enums import CellType
+from services.level_loader import LevelLoader
+from core.solver import Solver
 
 
 class LevelValidator:
@@ -136,3 +138,78 @@ class LevelValidator:
             )
         
         return errors
+    
+
+def validate_level(level_data: Dict[str, Any]) -> Dict[str, Any]:
+    """
+    Validate a traffic puzzle level for solvability.
+    
+    Args:
+        level_data: Level configuration in JSON format
+        
+    Returns:
+        Dictionary with validation results
+    """
+    try:
+        # Load level and build graph
+        loader = LevelLoader()
+        graph, initial_state = loader.load_level(level_data)
+        
+        # Validate initial state
+        validator = LevelValidator()
+        is_valid, errors = validator.validate_initial_state(graph, initial_state)
+        
+        if not is_valid:
+            return {
+                "error": {
+                    "code": "INVALID_LEVEL_DATA",
+                    "message": "Level data failed validation",
+                    "details": [{"message": error} for error in errors]
+                }
+            }
+        
+        # Attempt to solve
+        solver = Solver(graph)
+        result = solver.solve(initial_state)
+        
+        if result.solvable:
+            return {
+                "solvable": True,
+                "solution": result.solution,
+                "totalMoves": result.total_moves
+            }
+        else:
+            # Format blocking details for response
+            response = {
+                "solvable": False,
+                "partialSolution": result.solution,
+                "movesUntilBlock": len(result.solution),
+                "reason": result.reason
+            }
+            
+            if result.blocking_details:
+                response["blockingDetails"] = result.blocking_details
+            
+            return response
+            
+    except KeyError as e:
+        return {
+            "error": {
+                "code": "INVALID_REQUEST",
+                "message": f"Missing required field: {str(e)}"
+            }
+        }
+    except ValueError as e:
+        return {
+            "error": {
+                "code": "VALIDATION_ERROR",
+                "message": str(e)
+            }
+        }
+    except Exception as e:
+        return {
+            "error": {
+                "code": "SERVER_ERROR",
+                "message": f"An unexpected error occurred: {str(e)}"
+            }
+        }
