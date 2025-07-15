@@ -7,10 +7,10 @@ sys.path.append(str(project_root))
 app_dir = project_root / 'app'
 sys.path.append(str(app_dir))
 
-from core.graph_builder import GraphBuilder
-from core.path_calculator import PathCalculator
-from models.graph import Position
-from models.enums import Orientation, MovementRule, CellType
+from core.graph_builder import GraphBuilder # type: ignore
+from core.path_calculator import PathCalculator # type: ignore
+from models.graph import Position # type: ignore
+from models.enums import Orientation, MovementRule, CellType # type: ignore
 
 def print_grid_visualization(layout):
     """Print the grid in a readable format"""

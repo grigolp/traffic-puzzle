@@ -8,7 +8,7 @@ app_dir = project_root / 'app'
 sys.path.append(str(app_dir))
 
 import json
-from lambda_function import lambda_handler
+from lambda_function import lambda_handler # type: ignore
 
 
 def test_lambda_with_level_116():

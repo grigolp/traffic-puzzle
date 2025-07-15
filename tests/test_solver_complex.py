@@ -8,14 +8,14 @@ app_dir = project_root / 'app'
 sys.path.append(str(app_dir))
 
 
-from services.level_loader import LevelLoader
-from services.validator import LevelValidator
-from core.solver import Solver
-from models.graph import Position
-from models.enums import Orientation, MovementRule
-from models.vehicles import Vehicle, VehicleType
-from models.obstacles import Boulder
-from models.game_state import GameState
+from services.level_loader import LevelLoader # type: ignore
+from services.validator import LevelValidator # type: ignore
+from core.solver import Solver # type: ignore
+from models.graph import Position # type: ignore
+from models.enums import Orientation, MovementRu # type: ignore
+from models.vehicles import Vehicle, VehicleType # type: ignore
+from models.obstacles import Boulder # type: ignore
+from models.game_state import GameState # type: ignore
 
 
 def print_grid_visualization(layout):

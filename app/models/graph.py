@@ -34,7 +34,7 @@ class RoadGraph:
         self.height = height
         self.nodes: Dict[str, Node] = {}
         self.exit_positions: Set[Position] = set()
-        self.path_lookup: Dict[str, Dict[Orientation, Dict[MovementRule, 'PathInfo']]] = {}
+        self.path_lookup: Dict[str, Dict[Orientation, Dict[MovementRule, 'PathInfo']]] = {} # type: ignore
     
     def get_node_id(self, x: int, y: int) -> str:
         """Generate consistent node ID from coordinates"""

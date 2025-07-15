@@ -7,9 +7,9 @@ sys.path.append(str(project_root))
 app_dir = project_root / 'app'
 sys.path.append(str(app_dir))
 
-from core.graph_builder import GraphBuilder
-from models.graph import Position
-from models.enums import Orientation, Direction, CellType
+from core.graph_builder import GraphBuilder # type: ignore
+from models.graph import Position # type: ignore
+from models.enums import Orientation, Direction, CellType # type: ignore
 
 def test_graph_building():
     """Test graph building and neighbor relationships"""
