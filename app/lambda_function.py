@@ -4,6 +4,16 @@ from services.validator import validate_level
 def lambda_handler(event, context):
     """AWS Lambda handler for level validation"""
     try:
+        if event.get('httpMethod') == 'GET' and not event.get('body'):
+            return {
+                'statusCode': 200,
+                'headers': {
+                    'Content-Type': 'application/json',
+                    'Access-Control-Allow-Origin': '*'
+                },
+                'body': json.dumps({'message': 'Empty GET request processed successfully'})
+            }
+
         # Handle different event sources (API Gateway, direct invocation, etc.)
         if isinstance(event.get('body'), str):
             # API Gateway sends body as string
