@@ -72,6 +72,7 @@ class PathCalculator:
         # Make the required number of turns
         while turns_made < num_turns:
             turn_found = False
+            path_after_turn = []
             
             while not turn_found:
                 # Check for loops
@@ -88,7 +89,17 @@ class PathCalculator:
                 #
                 # To check the previous node, we access the path at index -2, because the
                 # last element (path[-1]) is the current node.
-                if len(path) >= 2 and not graph.nodes[path[-2]].cell_type.is_intersection:
+                if len(path) >= 2:
+                    # check if path starts at an intersection and is still on the intersection
+                    if all(graph.nodes[node_id].cell_type.is_intersection for node_id in path):
+                        return PathInfo(exit_path=[], exit_point=None, valid=False)
+                    
+                    # check if turn is made at this intersection
+                    if path_after_turn:
+                        if all(graph.nodes[node_id].cell_type.is_intersection for node_id in path_after_turn):
+                            return PathInfo(exit_path=[], exit_point=None, valid=False)
+                        
+                    # check if the previous node is an intersection
                     if current_orientation in current_node.neighbors:
                         next_node_id = current_node.neighbors[current_orientation].get(turn_direction)
                         if next_node_id:
@@ -96,6 +107,7 @@ class PathCalculator:
                             next_node = graph.nodes[next_node_id]
                             current_orientation = self.turn_mappings[current_orientation][turn_direction]
                             path.append(next_node.id)
+                            path_after_turn = [next_node.id]
                             turns_made += 1
                             turn_found = True
                             continue
@@ -110,10 +122,11 @@ class PathCalculator:
                 
                 current_node = graph.nodes[next_node_id]
                 path.append(current_node.id)
-                
-                # Check if we've reached an exit before completing turns (Successful exit)
+                if path_after_turn: path_after_turn.append(current_node.id) 
+
+                # Check if we've reached an exit before completing turns (Unsuccessful exit)
                 if graph.is_exit_position(current_node):
-                    return PathInfo(exit_path=path, exit_point=current_node.position, valid=True)
+                    return PathInfo(exit_path=[], exit_point=None, valid=False)
         
         # After making all required turns, continue straight to exit
         return self._continue_straight_to_exit(graph, current_node, current_orientation, path)
