@@ -36,21 +36,21 @@ Content-Type: application/json
     {
       "id":           "string",              // e.g. "C01", "T02", "B01"
       "type":         "CAR" | "TRUCK" | "BULLDOZER",
-      "length":       1 | 2,                  // cells occupied
+      "length":       2 | 3,                 // cells occupied (CAR/BULLDOZER: 2, TRUCK: 4)
       "position":     { "x": integer, "y": integer },
       "orientation":  "NORTH" | "SOUTH" | "EAST" | "WEST",
       "movementRule": "STRAIGHT" | "LEFT" | "RIGHT" | "LEFT_U_TURN" | "RIGHT_U_TURN"
     }
   ],
   "obstacles": [
-    //--- BOULDER ---
+    //--- BOULDER (IMPLEMENTED) ---
     {
       "id":       "string",
       "type":     "BOULDER",
       "position": { "x": integer, "y": integer }
     },
 
-    //--- TRAFFIC LIGHT ---
+    //--- TRAFFIC LIGHT (FUTURE IMPLEMENTATION) ---
     {
       "id":           "string",
       "type":         "TRAFFIC_LIGHT",
@@ -63,7 +63,7 @@ Content-Type: application/json
       }
     },
 
-    //--- PEDESTRIAN ---
+    //--- PEDESTRIAN (FUTURE IMPLEMENTATION) ---
     {
       "id":               "string",
       "type":             "PEDESTRIAN",
@@ -83,10 +83,20 @@ Content-Type: application/json
 
 **Movement Rules:**
 - `STRAIGHT`: Vehicle continues forward until exit
-- `LEFT`: Vehicle takes first available left turn
-- `RIGHT`: Vehicle takes first available right turn
-- `LEFT_U_TURN`: Vehicle makes two consecutive left turns
-- `RIGHT_U_TURN`: Vehicle makes two consecutive right turns
+- `LEFT`: Vehicle must move forward at least one step, then takes first available left turn, then continues to exit
+- `RIGHT`: Vehicle must move forward at least one step, then takes first available right turn, then continues to exit  
+- `LEFT_U_TURN`: Vehicle makes two consecutive left turns to reverse direction
+- `RIGHT_U_TURN`: Vehicle makes two consecutive right turns to reverse direction
+
+**Important Movement Restrictions:**
+- Vehicles cannot turn immediately from their starting position
+- Turns are prohibited if the previous cell was also an intersection (prevents illegal U-turns)
+- These restrictions significantly impact puzzle solvability and must be considered in level design
+
+**Coordinate System:**
+- All input coordinates are 0-indexed relative to the original grid
+- The validator automatically adds an exit border around the grid during processing
+- Input/output coordinates remain relative to the original grid dimensions
 
 ---
 
@@ -190,6 +200,8 @@ Content-Type: application/json
 | 422  | `INVALID_VEHICLE_ORIENTATION` | Vehicle orientation incompatible with road type|
 | 500  | `SERVER_ERROR`                | Unexpected server-side failure                |
 
+**Note:** Additional error codes may be implemented in future versions for more specific validation scenarios.
+
 ---
 
 ## 3. Usage Examples
@@ -213,7 +225,7 @@ curl -X POST http://localhost:8000/api/v1/validate \
       ]
     },
     "vehicles": [{
-      "id":"C01","type":"CAR","length":1,
+      "id":"C01","type":"CAR","length":2,
       "position":{"x":2,"y":2},
       "orientation":"EAST","movementRule":"STRAIGHT"
     }],
@@ -251,12 +263,12 @@ curl -X POST http://localhost:8000/api/v1/validate \
     },
     "vehicles": [
       {
-        "id":"C01","type":"CAR","length":1,
+        "id":"C01","type":"CAR","length":2,
         "position":{"x":1,"y":2},
         "orientation":"EAST","movementRule":"STRAIGHT"
       },
       {
-        "id":"C02","type":"CAR","length":1,
+        "id":"C02","type":"CAR","length":2,
         "position":{"x":3,"y":2},
         "orientation":"WEST","movementRule":"STRAIGHT"
       }

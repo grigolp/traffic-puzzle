@@ -128,7 +128,7 @@ def test_lambda_with_level_116():
         {
             "id": "T01",
             "type": "TRUCK",
-            "length": 4,
+            "length": 3,
             "position": {"x": 1, "y": 13},
             "orientation": "WEST",
             "movementRule": "STRAIGHT"

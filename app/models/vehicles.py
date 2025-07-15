@@ -15,7 +15,7 @@ class VehicleType(Enum):
 class Vehicle:
     id: str
     type: VehicleType
-    length: int  # 2 for CAR/BULLDOZER, 4 for TRUCK
+    length: int
     position: Position  # Head/front position
     orientation: Orientation
     movement_rule: MovementRule
