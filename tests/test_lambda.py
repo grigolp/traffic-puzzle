@@ -1,9 +1,14 @@
 import sys
 from pathlib import Path
-sys.path.append(str(Path(__file__).parent.parent))
+
+project_root = Path(__file__).parent.parent
+sys.path.append(str(project_root))
+
+app_dir = project_root / 'app'
+sys.path.append(str(app_dir))
 
 import json
-from app.lambda_function import lambda_handler
+from lambda_function import lambda_handler
 
 
 def test_lambda_with_level_116():
