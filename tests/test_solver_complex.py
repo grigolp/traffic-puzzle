@@ -12,7 +12,7 @@ from services.level_loader import LevelLoader # type: ignore
 from services.validator import LevelValidator # type: ignore
 from core.solver import Solver # type: ignore
 from models.graph import Position # type: ignore
-from models.enums import Orientation, MovementRu # type: ignore
+from models.enums import Orientation, MovementRule # type: ignore
 from models.vehicles import Vehicle, VehicleType # type: ignore
 from models.obstacles import Boulder # type: ignore
 from models.game_state import GameState # type: ignore
@@ -216,7 +216,7 @@ def test_actual_level_116():
         {
             "id": "T01",
             "type": "TRUCK",
-            "length": 4,
+            "length": 3,
             "position": {"x": 1, "y": 13},
             "orientation": "WEST",
             "movementRule": "STRAIGHT"

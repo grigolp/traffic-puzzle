@@ -21,16 +21,22 @@ Exit points are handled by adding a border of exit nodes around the grid during 
 **vehicles:** An array of vehicle objects, each with:
 - `id`: A unique string identifier (e.g., "C01", "T02", "B01")
 - `type`: CAR, TRUCK, or BULLDOZER
-- `length`: 1 for CAR/BULLDOZER, 2 for TRUCK
-- `position`: A single {x, y} coordinate representing the head/front position
+- `length`: 2 for CAR/BULLDOZER, 3 for TRUCK
+- `position`: A single {x, y} coordinate representing the head/front position (relative to original grid)
 - `orientation`: NORTH, SOUTH, EAST, or WEST
 - `movementRule`: STRAIGHT, LEFT, RIGHT, LEFT_U_TURN, or RIGHT_U_TURN
 
 **obstacles:** An array of obstacle objects including:
-- `BOULDER` (static): blocks all vehicles except BULLDOZER
-- `TRAFFIC_LIGHT` (dynamic): with currentState (RED/GREEN) and timing
-- `PEDESTRIAN` (dynamic): with crossingTime and currentProgress
-- `position`: An {x, y} coordinate
+- `BOULDER` (implemented): blocks all vehicles except BULLDOZER
+- `TRAFFIC_LIGHT` (future): with currentState (RED/GREEN) and timing
+- `PEDESTRIAN` (future): with crossingTime and currentProgress
+- `position`: An {x, y} coordinate (relative to original grid)
+
+**Coordinate Handling:**
+- Input coordinates are relative to the original grid dimensions
+- During processing, an exit border is automatically added around the grid
+- All internal calculations use shifted coordinates (+1 offset)
+- This coordinate transformation is transparent to the user
 
 ### 2.2. Internal Path Calculation
 
@@ -50,19 +56,28 @@ PathLookup[node_id][orientation][movement_rule] = {
 }
 ```
 
-**Path Constraints:**
-- The generated path must conform to the vehicle's specified `movementRule`
-- Horizontal roads only allow east/west movement
-- Vertical roads only allow north/south movement
-- Intersections allow turns in any direction
-- All cells in the path must be clear of other vehicles
-
 **Movement Rules:**
 - `STRAIGHT`: Continue forward until exit
-- `LEFT`: Continue until first available left turn, take it, then continue to exit
-- `RIGHT`: Continue until first available right turn, take it, then continue to exit
+- `LEFT`: Move forward at least one step, then take first available left turn and continue to exit
+- `RIGHT`: Move forward at least one step, then take first available right turn and continue to exit
 - `LEFT_U_TURN`: Make two consecutive left turns to reverse direction
 - `RIGHT_U_TURN`: Make two consecutive right turns to reverse direction
+
+**Movement Constraints:**
+- Vehicles cannot turn immediately from their starting position
+- A vehicle must move forward at least one cell before initiating a turn
+- Turns are prohibited if the previous node was also an intersection (prevents illegal U-turns within multi-lane intersections)
+- Horizontal roads only allow east/west movement
+- Vertical roads only allow north/south movement
+- Intersections allow movement and turns in any valid direction
+
+**Path Generation Algorithm:**
+The path calculator implements sophisticated turn logic:
+1. For straight movement: continue forward until reaching an exit
+2. For turn movements: move forward until a valid turn opportunity, make required number of turns, then continue straight to exit
+3. Turn validation includes checking previous intersection state to prevent consecutive intersection turns
+4. State tracking prevents infinite loops during path calculation
+5. Each path is pre-calculated and cached for O(1) lookup during solving
 
 **Obstacle Interaction:**
 - For CAR and TRUCK vehicles, the path must also be clear of any BOULDERs
@@ -77,8 +92,8 @@ A "State" is a complete snapshot of the puzzle at a specific moment, defined by 
 - **Active Vehicles:** The set of vehicles currently on the grid (ID, Type, current position, orientation)
 - **Active Obstacles:** The current state of all obstacles:
   - **Boulders:** coordinates of remaining boulders
-  - **Traffic Lights:** current state (RED/GREEN) and timing counters
-  - **Pedestrians:** current crossing progress
+  - **Traffic Lights:** current state (RED/GREEN) and timing counters (future implementation)
+  - **Pedestrians:** current crossing progress (future implementation)
 
 ### 2.4. Actions (State Transitions)
 
