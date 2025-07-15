@@ -1,0 +1,993 @@
+{
+	"info": {
+		"_postman_id": "4d5c41f3-d25e-4a36-837b-1560009c25df",
+		"name": "Traffic Puzzle Level Validator - Full Test Suite",
+		"description": "Comprehensive test suite for Traffic Puzzle Level Validator API with performance benchmarks, error validation, and edge case testing",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "19046591"
+	},
+	"item": [
+		{
+			"name": "1. Happy Path Tests",
+			"item": [
+				{
+					"name": "Simple Solvable - Single Vehicle",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Response time check",
+									"pm.test(\"Response time is less than 500ms\", function () {",
+									"    pm.expect(pm.response.responseTime).to.be.below(500);",
+									"});",
+									"",
+									"// Status code check",
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"// Parse response",
+									"const jsonData = pm.response.json();",
+									"",
+									"// Validate response structure",
+									"pm.test(\"Response has required fields\", function () {",
+									"    pm.expect(jsonData).to.have.property('solvable');",
+									"    pm.expect(jsonData).to.have.property('solution');",
+									"    pm.expect(jsonData).to.have.property('totalMoves');",
+									"});",
+									"",
+									"// Validate solvability",
+									"pm.test(\"Level is solvable\", function () {",
+									"    pm.expect(jsonData.solvable).to.be.true;",
+									"});",
+									"",
+									"// Validate solution",
+									"pm.test(\"Solution contains expected vehicle\", function () {",
+									"    pm.expect(jsonData.solution).to.include('C01');",
+									"    pm.expect(jsonData.totalMoves).to.equal(1);",
+									"});",
+									"",
+									"// Store results for reporting",
+									"pm.environment.set(\"last_test_result\", \"PASS\");",
+									"pm.environment.set(\"last_response_time\", pm.response.responseTime);"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"levelId\": \"test_simple_001\",\n    \"metadata\": {\n        \"difficulty\": \"easy\",\n        \"targetMoves\": 1\n    },\n    \"grid\": {\n        \"dimensions\": {\"width\": 5, \"height\": 3},\n        \"layout\": [\n            [\"-\", \"-\", \"-\", \"-\", \"-\"],\n            [\"0\", \"0\", \"0\", \"0\", \"0\"],\n            [\"0\", \"0\", \"0\", \"0\", \"0\"]\n        ]\n    },\n    \"vehicles\": [\n        {\n            \"id\": \"C01\",\n            \"type\": \"CAR\",\n            \"length\": 2,\n            \"position\": {\"x\": 1, \"y\": 0},\n            \"orientation\": \"EAST\",\n            \"movementRule\": \"STRAIGHT\"\n        }\n    ],\n    \"obstacles\": []\n}"
+						},
+						"url": {
+							"raw": "{{api_endpoint}}",
+							"host": [
+								"{{api_endpoint}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Medium Complexity - 5 Vehicles",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Response time is less than 200ms\", function () {",
+									"    pm.expect(pm.response.responseTime).to.be.below(200);",
+									"});",
+									"",
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"const jsonData = pm.response.json();",
+									"",
+									"pm.test(\"Level is solvable with multiple vehicles\", function () {",
+									"    pm.expect(jsonData.solvable).to.be.true;",
+									"    pm.expect(jsonData.solution).to.have.lengthOf(5);",
+									"    pm.expect(jsonData.totalMoves).to.equal(5);",
+									"});",
+									"",
+									"pm.test(\"Solution contains all vehicles\", function () {",
+									"    const expectedVehicles = ['C01', 'C02', 'C03', 'T01', 'C04'];",
+									"    expectedVehicles.forEach(vehicle => {",
+									"        pm.expect(jsonData.solution).to.include(vehicle);",
+									"    });",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"levelId\": \"test_medium_001\",\n    \"metadata\": {\n        \"difficulty\": \"medium\",\n        \"targetMoves\": 5\n    },\n    \"grid\": {\n        \"dimensions\": {\"width\": 8, \"height\": 8},\n        \"layout\": [\n            [\"-\", \"-\", \"-\", \"+\", \"-\", \"-\", \"-\", \"-\"],\n            [\"0\", \"0\", \"0\", \"|\", \"0\", \"0\", \"0\", \"0\"],\n            [\"0\", \"0\", \"0\", \"|\", \"0\", \"0\", \"0\", \"0\"],\n            [\"-\", \"-\", \"-\", \"+\", \"-\", \"-\", \"+\", \"-\"],\n            [\"0\", \"0\", \"0\", \"|\", \"0\", \"0\", \"|\", \"0\"],\n            [\"0\", \"0\", \"0\", \"|\", \"0\", \"0\", \"|\", \"0\"],\n            [\"0\", \"-\", \"-\", \"+\", \"-\", \"-\", \"+\", \"-\"],\n            [\"0\", \"0\", \"0\", \"|\", \"0\", \"0\", \"|\", \"0\"]\n        ]\n    },\n    \"vehicles\": [\n        {\n            \"id\": \"C01\",\n            \"type\": \"CAR\",\n            \"length\": 2,\n            \"position\": {\"x\": 1, \"y\": 0},\n            \"orientation\": \"EAST\",\n            \"movementRule\": \"STRAIGHT\"\n        },\n        {\n            \"id\": \"C02\",\n            \"type\": \"CAR\",\n            \"length\": 2,\n            \"position\": {\"x\": 3, \"y\": 1},\n            \"orientation\": \"SOUTH\",\n            \"movementRule\": \"STRAIGHT\"\n        },\n        {\n            \"id\": \"C03\",\n            \"type\": \"CAR\",\n            \"length\": 2,\n            \"position\": {\"x\": 6, \"y\": 5},\n            \"orientation\": \"NORTH\",\n            \"movementRule\": \"LEFT\"\n        },\n        {\n            \"id\": \"T01\",\n            \"type\": \"TRUCK\",\n            \"length\": 3,\n            \"position\": {\"x\": 2, \"y\": 3},\n            \"orientation\": \"EAST\",\n            \"movementRule\": \"RIGHT\"\n        },\n        {\n            \"id\": \"C04\",\n            \"type\": \"CAR\",\n            \"length\": 2,\n            \"position\": {\"x\": 2, \"y\": 6},\n            \"orientation\": \"EAST\",\n            \"movementRule\": \"STRAIGHT\"\n        }\n    ],\n    \"obstacles\": []\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{api_endpoint}}",
+							"host": [
+								"{{api_endpoint}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Complex Solvable - Level 116",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Response time is less than 200ms for complex level\", function () {",
+									"    pm.expect(pm.response.responseTime).to.be.below(200);",
+									"});",
+									"",
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"const jsonData = pm.response.json();",
+									"",
+									"pm.test(\"Complex level is solvable\", function () {",
+									"    pm.expect(jsonData.solvable).to.be.true;",
+									"});",
+									"",
+									"pm.test(\"Solution has expected number of moves\", function () {",
+									"    pm.expect(jsonData.totalMoves).to.be.at.least(15);",
+									"    pm.expect(jsonData.solution).to.have.lengthOf.at.least(15);",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"levelId\": \"level_116\",\n    \"metadata\": {\n        \"difficulty\": \"hard\",\n        \"targetMoves\": 18\n    },\n    \"grid\": {\n        \"dimensions\": {\"width\": 10, \"height\": 20},\n        \"layout\": [\n            [\"0\",\"|\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"|\",\"0\"],\n            [\"0\",\"|\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"|\",\"0\"],\n            [\"-\",\"+\",\"-\",\"-\",\"-\",\"-\",\"-\",\"-\",\"+\",\"-\"],\n            [\"0\",\"|\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"|\",\"0\"],\n            [\"0\",\"|\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"|\",\"0\"],\n            [\"0\",\"|\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"|\",\"0\"],\n            [\"0\",\"|\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"|\",\"0\"],\n            [\"0\",\"|\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"|\",\"0\"],\n            [\"0\",\"|\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"|\",\"0\"],\n            [\"-\",\"+\",\"-\",\"-\",\"-\",\"-\",\"-\",\"-\",\"+\",\"-\"],\n            [\"0\",\"|\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"|\",\"0\"],\n            [\"0\",\"|\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"|\",\"0\"],\n            [\"0\",\"|\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"|\",\"0\"],\n            [\"-\",\"+\",\"-\",\"-\",\"-\",\"-\",\"-\",\"-\",\"+\",\"-\"],\n            [\"0\",\"|\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"|\",\"0\"],\n            [\"0\",\"|\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"|\",\"0\"],\n            [\"0\",\"|\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"|\",\"0\"],\n            [\"-\",\"+\",\"-\",\"-\",\"-\",\"-\",\"-\",\"-\",\"+\",\"-\"],\n            [\"0\",\"|\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"|\",\"0\"],\n            [\"0\",\"|\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"|\",\"0\"]\n        ]\n    },\n    \"vehicles\": [\n        {\n            \"id\": \"C01\",\n            \"type\": \"CAR\",\n            \"length\": 2,\n            \"position\": {\"x\": 2, \"y\": 2},\n            \"orientation\": \"WEST\",\n            \"movementRule\": \"RIGHT\"\n        },\n        {\n            \"id\": \"C02\",\n            \"type\": \"CAR\",\n            \"length\": 2,\n            \"position\": {\"x\": 7, \"y\": 2},\n            \"orientation\": \"EAST\",\n            \"movementRule\": \"LEFT\"\n        },\n        {\n            \"id\": \"C03\",\n            \"type\": \"CAR\",\n            \"length\": 2,\n            \"position\": {\"x\": 1, \"y\": 3},\n            \"orientation\": \"NORTH\",\n            \"movementRule\": \"RIGHT_U_TURN\"\n        },\n        {\n            \"id\": \"C04\",\n            \"type\": \"CAR\",\n            \"length\": 2,\n            \"position\": {\"x\": 8, \"y\": 3},\n            \"orientation\": \"NORTH\",\n            \"movementRule\": \"LEFT\"\n        },\n        {\n            \"id\": \"B01\",\n            \"type\": \"BULLDOZER\",\n            \"length\": 2,\n            \"position\": {\"x\": 1, \"y\": 8},\n            \"orientation\": \"SOUTH\",\n            \"movementRule\": \"STRAIGHT\"\n        },\n        {\n            \"id\": \"C05\",\n            \"type\": \"CAR\",\n            \"length\": 2,\n            \"position\": {\"x\": 8, \"y\": 8},\n            \"orientation\": \"SOUTH\",\n            \"movementRule\": \"STRAIGHT\"\n        },\n        {\n            \"id\": \"C06\",\n            \"type\": \"CAR\",\n            \"length\": 2,\n            \"position\": {\"x\": 2, \"y\": 9},\n            \"orientation\": \"WEST\",\n            \"movementRule\": \"LEFT\"\n        },\n        {\n            \"id\": \"C07\",\n            \"type\": \"CAR\",\n            \"length\": 2,\n            \"position\": {\"x\": 7, \"y\": 9},\n            \"orientation\": \"WEST\",\n            \"movementRule\": \"STRAIGHT\"\n        },\n        {\n            \"id\": \"C08\",\n            \"type\": \"CAR\",\n            \"length\": 2,\n            \"position\": {\"x\": 1, \"y\": 12},\n            \"orientation\": \"SOUTH\",\n            \"movementRule\": \"STRAIGHT\"\n        },\n        {\n            \"id\": \"C09\",\n            \"type\": \"CAR\",\n            \"length\": 2,\n            \"position\": {\"x\": 8, \"y\": 10},\n            \"orientation\": \"NORTH\",\n            \"movementRule\": \"LEFT\"\n        },\n        {\n            \"id\": \"T01\",\n            \"type\": \"TRUCK\",\n            \"length\": 3,\n            \"position\": {\"x\": 1, \"y\": 13},\n            \"orientation\": \"WEST\",\n            \"movementRule\": \"STRAIGHT\"\n        },\n        {\n            \"id\": \"C10\",\n            \"type\": \"CAR\",\n            \"length\": 2,\n            \"position\": {\"x\": 6, \"y\": 13},\n            \"orientation\": \"EAST\",\n            \"movementRule\": \"STRAIGHT\"\n        },\n        {\n            \"id\": \"C11\",\n            \"type\": \"CAR\",\n            \"length\": 2,\n            \"position\": {\"x\": 1, \"y\": 14},\n            \"orientation\": \"NORTH\",\n            \"movementRule\": \"RIGHT\"\n        },\n        {\n            \"id\": \"C12\",\n            \"type\": \"CAR\",\n            \"length\": 2,\n            \"position\": {\"x\": 8, \"y\": 14},\n            \"orientation\": \"NORTH\",\n            \"movementRule\": \"LEFT_U_TURN\"\n        },\n        {\n            \"id\": \"C13\",\n            \"type\": \"CAR\",\n            \"length\": 2,\n            \"position\": {\"x\": 2, \"y\": 17},\n            \"orientation\": \"WEST\",\n            \"movementRule\": \"LEFT\"\n        },\n        {\n            \"id\": \"C14\",\n            \"type\": \"CAR\",\n            \"length\": 2,\n            \"position\": {\"x\": 6, \"y\": 17},\n            \"orientation\": \"WEST\",\n            \"movementRule\": \"RIGHT\"\n        },\n        {\n            \"id\": \"C15\",\n            \"type\": \"CAR\",\n            \"length\": 2,\n            \"position\": {\"x\": 1, \"y\": 18},\n            \"orientation\": \"SOUTH\",\n            \"movementRule\": \"STRAIGHT\"\n        },\n        {\n            \"id\": \"C16\",\n            \"type\": \"CAR\",\n            \"length\": 2,\n            \"position\": {\"x\": 8, \"y\": 18},\n            \"orientation\": \"SOUTH\",\n            \"movementRule\": \"STRAIGHT\"\n        }\n    ],\n    \"obstacles\": [\n        {\n            \"id\": \"OB1\",\n            \"type\": \"BOULDER\",\n            \"position\": {\"x\": 1, \"y\": 9}\n        }\n    ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{api_endpoint}}",
+							"host": [
+								"{{api_endpoint}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Bulldozer Clearing Boulder",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"const jsonData = pm.response.json();",
+									"",
+									"pm.test(\"Level with bulldozer and boulder is solvable\", function () {",
+									"    pm.expect(jsonData.solvable).to.be.true;",
+									"});",
+									"",
+									"pm.test(\"Bulldozer clears path for other vehicles\", function () {",
+									"    pm.expect(jsonData.solution).to.include('B01');",
+									"    pm.expect(jsonData.solution).to.include('C01');",
+									"    // Bulldozer should exit before the car",
+									"    const bulldozerIndex = jsonData.solution.indexOf('B01');",
+									"    const carIndex = jsonData.solution.indexOf('C01');",
+									"    pm.expect(bulldozerIndex).to.be.below(carIndex);",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"levelId\": \"test_bulldozer_001\",\n    \"metadata\": {\n        \"difficulty\": \"easy\",\n        \"targetMoves\": 2\n    },\n    \"grid\": {\n        \"dimensions\": {\"width\": 7, \"height\": 3},\n        \"layout\": [\n            [\"-\", \"-\", \"-\", \"-\", \"-\", \"-\", \"-\"],\n            [\"0\", \"0\", \"0\", \"0\", \"0\", \"0\", \"0\"],\n            [\"0\", \"0\", \"0\", \"0\", \"0\", \"0\", \"0\"]\n        ]\n    },\n    \"vehicles\": [\n        {\n            \"id\": \"B01\",\n            \"type\": \"BULLDOZER\",\n            \"length\": 2,\n            \"position\": {\"x\": 3, \"y\": 0},\n            \"orientation\": \"EAST\",\n            \"movementRule\": \"STRAIGHT\"\n        },\n        {\n            \"id\": \"C01\",\n            \"type\": \"CAR\",\n            \"length\": 2,\n            \"position\": {\"x\": 1, \"y\": 0},\n            \"orientation\": \"EAST\",\n            \"movementRule\": \"STRAIGHT\"\n        }\n    ],\n    \"obstacles\": [\n        {\n            \"id\": \"OB1\",\n            \"type\": \"BOULDER\",\n            \"position\": {\"x\": 4, \"y\": 0}\n        }\n    ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{api_endpoint}}",
+							"host": [
+								"{{api_endpoint}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "All Movement Types Test",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"const jsonData = pm.response.json();",
+									"",
+									"pm.test(\"All movement types work correctly\", function () {",
+									"    pm.expect(jsonData.solvable).to.be.true;",
+									"    pm.expect(jsonData.solution).to.have.lengthOf(5);",
+									"});",
+									"",
+									"pm.test(\"Each vehicle with different movement rule can exit\", function () {",
+									"    ['C01', 'C02', 'C03', 'C04', 'C05'].forEach(vehicle => {",
+									"        pm.expect(jsonData.solution).to.include(vehicle);",
+									"    });",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"levelId\": \"test_movements_001\",\n    \"metadata\": {\n        \"difficulty\": \"medium\",\n        \"targetMoves\": 5\n    },\n    \"grid\": {\n        \"dimensions\": {\"width\": 10, \"height\": 10},\n        \"layout\": [\n            [\"0\", \"|\", \"|\", \"0\", \"0\", \"0\", \"0\", \"|\", \"|\", \"0\"],\n            [\"0\", \"|\", \"|\", \"0\", \"0\", \"0\", \"0\", \"|\", \"|\", \"0\"],\n            [\"-\", \"+\", \"+\", \"-\", \"-\", \"-\", \"-\", \"+\", \"+\", \"-\"],\n            [\"-\", \"+\", \"+\", \"-\", \"-\", \"-\", \"-\", \"+\", \"+\", \"-\"],\n            [\"0\", \"|\", \"|\", \"0\", \"0\", \"0\", \"0\", \"|\", \"|\", \"0\"],\n            [\"0\", \"|\", \"|\", \"0\", \"0\", \"0\", \"0\", \"|\", \"|\", \"0\"],\n            [\"-\", \"+\", \"+\", \"-\", \"-\", \"-\", \"-\", \"+\", \"+\", \"-\"],\n            [\"-\", \"+\", \"+\", \"-\", \"-\", \"-\", \"-\", \"+\", \"+\", \"-\"],\n            [\"0\", \"|\", \"|\", \"0\", \"0\", \"0\", \"0\", \"|\", \"|\", \"0\"],\n            [\"0\", \"|\", \"|\", \"0\", \"0\", \"0\", \"0\", \"|\", \"|\", \"0\"]\n        ]\n    },\n    \"vehicles\": [\n        {\n            \"id\": \"C01\",\n            \"type\": \"CAR\",\n            \"length\": 2,\n            \"position\": {\"x\": 1, \"y\": 2},\n            \"orientation\": \"EAST\",\n            \"movementRule\": \"STRAIGHT\"\n        },\n        {\n            \"id\": \"C02\",\n            \"type\": \"CAR\",\n            \"length\": 2,\n            \"position\": {\"x\": 4, \"y\": 3},\n            \"orientation\": \"WEST\",\n            \"movementRule\": \"LEFT\"\n        },\n        {\n            \"id\": \"C03\",\n            \"type\": \"CAR\",\n            \"length\": 2,\n            \"position\": {\"x\": 7, \"y\": 4},\n            \"orientation\": \"NORTH\",\n            \"movementRule\": \"RIGHT\"\n        },\n        {\n            \"id\": \"C04\",\n            \"type\": \"CAR\",\n            \"length\": 2,\n            \"position\": {\"x\": 5, \"y\": 6},\n            \"orientation\": \"EAST\",\n            \"movementRule\": \"LEFT_U_TURN\"\n        },\n        {\n            \"id\": \"C05\",\n            \"type\": \"CAR\",\n            \"length\": 2,\n            \"position\": {\"x\": 4, \"y\": 7},\n            \"orientation\": \"WEST\",\n            \"movementRule\": \"RIGHT_U_TURN\"\n        }\n    ],\n    \"obstacles\": []\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{api_endpoint}}",
+							"host": [
+								"{{api_endpoint}}"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "2. Edge Cases",
+			"item": [
+				{
+					"name": "Empty Grid - No Vehicles",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"const jsonData = pm.response.json();",
+									"",
+									"pm.test(\"Empty grid is solvable\", function () {",
+									"    pm.expect(jsonData.solvable).to.be.true;",
+									"    pm.expect(jsonData.solution).to.be.empty;",
+									"    pm.expect(jsonData.totalMoves).to.equal(0);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"levelId\": \"test_empty_001\",\n    \"metadata\": {\n        \"difficulty\": \"easy\",\n        \"targetMoves\": 0\n    },\n    \"grid\": {\n        \"dimensions\": {\"width\": 5, \"height\": 5},\n        \"layout\": [\n            [\"-\", \"-\", \"-\", \"-\", \"-\"],\n            [\"|\", \"0\", \"0\", \"0\", \"|\"],\n            [\"+\", \"-\", \"+\", \"-\", \"+\"],\n            [\"|\", \"0\", \"0\", \"0\", \"|\"],\n            [\"-\", \"-\", \"-\", \"-\", \"-\"]\n        ]\n    },\n    \"vehicles\": [],\n    \"obstacles\": []\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{api_endpoint}}",
+							"host": [
+								"{{api_endpoint}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Vehicle at Grid Boundary",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"const jsonData = pm.response.json();",
+									"",
+									"pm.test(\"Vehicle at boundary can exit\", function () {",
+									"    pm.expect(jsonData.solvable).to.be.true;",
+									"    pm.expect(jsonData.solution).to.include('C01');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"levelId\": \"test_boundary\",\n    \"metadata\": {\n        \"difficulty\": \"easy\",\n        \"targetMoves\": 1\n    },\n    \"grid\": {\n        \"dimensions\": {\"width\": 5, \"height\": 5},\n        \"layout\": [\n            [\"-\", \"-\", \"-\", \"-\", \"-\"],\n            [\"0\", \"0\", \"0\", \"0\", \"0\"],\n            [\"0\", \"0\", \"0\", \"0\", \"0\"],\n            [\"0\", \"0\", \"0\", \"0\", \"0\"],\n            [\"0\", \"0\", \"0\", \"0\", \"0\"]\n        ]\n    },\n    \"vehicles\": [\n        {\n            \"id\": \"C01\",\n            \"type\": \"CAR\",\n            \"length\": 2,\n            \"position\": {\"x\": 4, \"y\": 0},\n            \"orientation\": \"EAST\",\n            \"movementRule\": \"STRAIGHT\"\n        }\n    ],\n    \"obstacles\": []\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{api_endpoint}}",
+							"host": [
+								"{{api_endpoint}}"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "3. Error Validation",
+			"item": [
+				{
+					"name": "Invalid JSON Format",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 400 for invalid JSON\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});",
+									"",
+									"const jsonData = pm.response.json();",
+									"",
+									"pm.test(\"Error response has correct structure\", function () {",
+									"    pm.expect(jsonData).to.have.property('error');",
+									"    pm.expect(jsonData.error).to.have.property('code');",
+									"    pm.expect(jsonData.error).to.have.property('message');",
+									"});",
+									"",
+									"pm.test(\"Error code is INVALID_REQUEST\", function () {",
+									"    pm.expect(jsonData.error.code).to.equal('INVALID_REQUEST');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"levelId\": \"test_invalid\",\n    \"metadata\": {\n        \"difficulty\": \"easy\",\n        \"targetMoves\": 1,\n    }, // Invalid trailing comma\n    \"grid\": {\n        \"dimensions\": {\"width\": 5, \"height\": 5}\n        // Missing layout\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{api_endpoint}}",
+							"host": [
+								"{{api_endpoint}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Missing Required Fields",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 400 for missing fields\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});",
+									"",
+									"const jsonData = pm.response.json();",
+									"",
+									"pm.test(\"Error indicates missing field\", function () {",
+									"    pm.expect(jsonData.error.code).to.equal('INVALID_REQUEST');",
+									"    pm.expect(jsonData.error.message.toLowerCase()).to.include('missing');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"levelId\": \"test_missing\",\n    \"metadata\": {\n        \"difficulty\": \"easy\",\n        \"targetMoves\": 1\n    },\n    \"vehicles\": [],\n    \"obstacles\": []\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{api_endpoint}}",
+							"host": [
+								"{{api_endpoint}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Invalid Enum Values",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 422 for invalid enum\", function () {",
+									"    pm.response.to.have.status(422);",
+									"});",
+									"",
+									"const jsonData = pm.response.json();",
+									"",
+									"pm.test(\"Error indicates validation error\", function () {",
+									"    pm.expect(jsonData.error.code).to.equal('VALIDATION_ERROR');",
+									"});",
+									"",
+									"pm.test(\"Error message mentions invalid orientation\", function () {",
+									"    pm.expect(jsonData.error.message.toLowerCase()).to.include('northeast');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"levelId\": \"test_invalid_enum\",\n    \"metadata\": {\n        \"difficulty\": \"easy\",\n        \"targetMoves\": 1\n    },\n    \"grid\": {\n        \"dimensions\": {\"width\": 5, \"height\": 5},\n        \"layout\": [\n            [\"-\", \"-\", \"-\", \"-\", \"-\"],\n            [\"0\", \"0\", \"0\", \"0\", \"0\"],\n            [\"0\", \"0\", \"0\", \"0\", \"0\"],\n            [\"0\", \"0\", \"0\", \"0\", \"0\"],\n            [\"0\", \"0\", \"0\", \"0\", \"0\"]\n        ]\n    },\n    \"vehicles\": [\n        {\n            \"id\": \"C01\",\n            \"type\": \"CAR\",\n            \"length\": 2,\n            \"position\": {\"x\": 0, \"y\": 0},\n            \"orientation\": \"NORTHEAST\",\n            \"movementRule\": \"STRAIGHT\"\n        }\n    ],\n    \"obstacles\": []\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{api_endpoint}}",
+							"host": [
+								"{{api_endpoint}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Vehicle Off Road",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 422 for vehicle off road\", function () {",
+									"    pm.response.to.have.status(422);",
+									"});",
+									"",
+									"const jsonData = pm.response.json();",
+									"",
+									"pm.test(\"Error indicates invalid level data\", function () {",
+									"    pm.expect(jsonData.error.code).to.equal('INVALID_LEVEL_DATA');",
+									"});",
+									"",
+									"pm.test(\"Error details mention vehicle placement\", function () {",
+									"    pm.expect(jsonData.error.details).to.be.an('array');",
+									"    const hasPlacementError = jsonData.error.details.some(detail => ",
+									"        detail.message.toLowerCase().includes('not on a road'));",
+									"    pm.expect(hasPlacementError).to.be.true;",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"levelId\": \"test_off_road\",\n    \"metadata\": {\n        \"difficulty\": \"easy\",\n        \"targetMoves\": 1\n    },\n    \"grid\": {\n        \"dimensions\": {\"width\": 5, \"height\": 5},\n        \"layout\": [\n            [\"-\", \"-\", \"-\", \"-\", \"-\"],\n            [\"0\", \"0\", \"0\", \"0\", \"0\"],\n            [\"0\", \"0\", \"0\", \"0\", \"0\"],\n            [\"0\", \"0\", \"0\", \"0\", \"0\"],\n            [\"0\", \"0\", \"0\", \"0\", \"0\"]\n        ]\n    },\n    \"vehicles\": [\n        {\n            \"id\": \"C01\",\n            \"type\": \"CAR\",\n            \"length\": 2,\n            \"position\": {\"x\": 2, \"y\": 2},\n            \"orientation\": \"EAST\",\n            \"movementRule\": \"STRAIGHT\"\n        }\n    ],\n    \"obstacles\": []\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{api_endpoint}}",
+							"host": [
+								"{{api_endpoint}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Vehicles Parts Outside Screen (Greed)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 422 for vehicle off road\", function () {",
+									"    pm.response.to.have.status(422);",
+									"});",
+									"",
+									"const jsonData = pm.response.json();",
+									"",
+									"pm.test(\"Error indicates invalid level data\", function () {",
+									"    pm.expect(jsonData.error.code).to.equal('INVALID_LEVEL_DATA');",
+									"});",
+									"",
+									"pm.test(\"Error details mention vehicle placement\", function () {",
+									"    pm.expect(jsonData.error.details).to.be.an('array');",
+									"    const hasPlacementError = jsonData.error.details.some(detail => ",
+									"        detail.message.toLowerCase().includes('not on a road'));",
+									"    pm.expect(hasPlacementError).to.be.true;",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"levelId\": \"test_overlap\",\n    \"metadata\": {\n        \"difficulty\": \"easy\",\n        \"targetMoves\": 2\n    },\n    \"grid\": {\n        \"dimensions\": {\"width\": 5, \"height\": 5},\n        \"layout\": [\n            [\"-\", \"-\", \"-\", \"-\", \"-\"],\n            [\"0\", \"0\", \"0\", \"0\", \"0\"],\n            [\"0\", \"0\", \"0\", \"0\", \"0\"],\n            [\"-\", \"-\", \"-\", \"-\", \"-\"],\n            [\"0\", \"0\", \"0\", \"0\", \"0\"]\n        ]\n    },\n    \"vehicles\": [\n        {\n            \"id\": \"C01\",\n            \"type\": \"CAR\",\n            \"length\": 2,\n            \"position\": {\"x\": 0, \"y\": 0},\n            \"orientation\": \"EAST\",\n            \"movementRule\": \"STRAIGHT\"\n        },\n        {\n            \"id\": \"T01\",\n            \"type\": \"TRUCK\",\n            \"length\": 3,\n            \"position\": {\"x\": 1, \"y\": 3},\n            \"orientation\": \"EAST\",\n            \"movementRule\": \"STRAIGHT\"\n        }\n    ],\n    \"obstacles\": []\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{api_endpoint}}",
+							"host": [
+								"{{api_endpoint}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Overlapping Vehicles",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 422 for overlapping vehicles\", function () {",
+									"    pm.response.to.have.status(422);",
+									"});",
+									"",
+									"const jsonData = pm.response.json();",
+									"",
+									"pm.test(\"Error indicates overlapping vehicles\", function () {",
+									"    pm.expect(jsonData.error.details).to.be.an('array');",
+									"    const hasOverlapError = jsonData.error.details.some(detail => ",
+									"        detail.message.toLowerCase().includes('overlap'));",
+									"    pm.expect(hasOverlapError).to.be.true;",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"levelId\": \"test_overlap\",\n    \"metadata\": {\n        \"difficulty\": \"easy\",\n        \"targetMoves\": 2\n    },\n    \"grid\": {\n        \"dimensions\": {\"width\": 5, \"height\": 5},\n        \"layout\": [\n            [\"-\", \"-\", \"-\", \"-\", \"-\"],\n            [\"0\", \"0\", \"0\", \"0\", \"0\"],\n            [\"0\", \"0\", \"0\", \"0\", \"0\"],\n            [\"0\", \"0\", \"0\", \"0\", \"0\"],\n            [\"0\", \"0\", \"0\", \"0\", \"0\"]\n        ]\n    },\n    \"vehicles\": [\n        {\n            \"id\": \"C01\",\n            \"type\": \"CAR\",\n            \"length\": 2,\n            \"position\": {\"x\": 3, \"y\": 0},\n            \"orientation\": \"EAST\",\n            \"movementRule\": \"STRAIGHT\"\n        },\n        {\n            \"id\": \"C02\",\n            \"type\": \"CAR\",\n            \"length\": 2,\n            \"position\": {\"x\": 2, \"y\": 0},\n            \"orientation\": \"EAST\",\n            \"movementRule\": \"STRAIGHT\"\n        }\n    ],\n    \"obstacles\": []\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{api_endpoint}}",
+							"host": [
+								"{{api_endpoint}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Vehicle Orientation Mismatch",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 422 for orientation mismatch\", function () {",
+									"    pm.response.to.have.status(422);",
+									"});",
+									"",
+									"const jsonData = pm.response.json();",
+									"",
+									"pm.test(\"Error mentions orientation incompatibility\", function () {",
+									"    const hasOrientationError = jsonData.error.details.some(detail =>",
+									"        detail.message.toLowerCase().includes('orientation') &&",
+									"        detail.message.toLowerCase().includes('incompatible'));",
+									"    pm.expect(hasOrientationError).to.be.true;",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"levelId\": \"test_orientation_mismatch\",\n    \"metadata\": {\n        \"difficulty\": \"easy\",\n        \"targetMoves\": 1\n    },\n    \"grid\": {\n        \"dimensions\": {\"width\": 5, \"height\": 5},\n        \"layout\": [\n            [\"-\", \"-\", \"-\", \"-\", \"-\"],\n            [\"0\", \"0\", \"|\", \"0\", \"0\"],\n            [\"0\", \"0\", \"|\", \"0\", \"0\"],\n            [\"0\", \"0\", \"|\", \"0\", \"0\"],\n            [\"0\", \"0\", \"0\", \"0\", \"0\"]\n        ]\n    },\n    \"vehicles\": [\n        {\n            \"id\": \"C01\",\n            \"type\": \"CAR\",\n            \"length\": 2,\n            \"position\": {\"x\": 2, \"y\": 1},\n            \"orientation\": \"EAST\",\n            \"movementRule\": \"STRAIGHT\"\n        }\n    ],\n    \"obstacles\": []\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{api_endpoint}}",
+							"host": [
+								"{{api_endpoint}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Invalid Directions (Vehicle Leaves Grid Before Turning)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 422 for orientation mismatch\", function () {",
+									"    pm.response.to.have.status(422);",
+									"});",
+									"",
+									"const jsonData = pm.response.json();",
+									"",
+									"pm.test(\"Error mentions no valid exit path\", function () {",
+									"    const hasOrientationError = jsonData.error.details.some(detail =>",
+									"        detail.message.toLowerCase().includes('no valid exit path with movement rule'));",
+									"    pm.expect(hasOrientationError).to.be.true;",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"levelId\": \"test_uturn_edge\",\n    \"metadata\": {\n        \"difficulty\": \"medium\",\n        \"targetMoves\": 1\n    },\n    \"grid\": {\n        \"dimensions\": {\"width\": 3, \"height\": 3},\n        \"layout\": [\n            [\"-\", \"-\", \"-\"],\n            [\"0\", \"0\", \"0\"],\n            [\"0\", \"0\", \"0\"]\n        ]\n    },\n    \"vehicles\": [\n        {\n            \"id\": \"C01\",\n            \"type\": \"CAR\",\n            \"length\": 2,\n            \"position\": {\"x\": 1, \"y\": 0},\n            \"orientation\": \"EAST\",\n            \"movementRule\": \"LEFT\"\n        }\n    ],\n    \"obstacles\": []\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{api_endpoint}}",
+							"host": [
+								"{{api_endpoint}}"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "4. Performance Tests",
+			"item": [
+				{
+					"name": "Round Trip Time",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Response time check",
+									"pm.test(\"Response time is less than 100ms\", function () {",
+									"    pm.expect(pm.response.responseTime).to.be.below(100);",
+									"});",
+									"",
+									"// Status code check",
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{api_endpoint}}",
+							"host": [
+								"{{api_endpoint}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Response Time - Simple Level",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Simple level processes in under 200ms\", function () {",
+									"    pm.expect(pm.response.responseTime).to.be.below(200);",
+									"});",
+									"",
+									"pm.test(\"Response has all required fields\", function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.all.keys('solvable', 'solution', 'totalMoves');",
+									"});",
+									"",
+									"// Store timing for comparison",
+									"pm.collectionVariables.set(\"simple_response_time\", pm.response.responseTime);"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"levelId\": \"perf_simple\",\n    \"metadata\": {\n        \"difficulty\": \"easy\",\n        \"targetMoves\": 1\n    },\n    \"grid\": {\n        \"dimensions\": {\"width\": 3, \"height\": 3},\n        \"layout\": [\n            [\"-\", \"-\", \"-\"],\n            [\"0\", \"0\", \"0\"],\n            [\"0\", \"0\", \"0\"]\n        ]\n    },\n    \"vehicles\": [\n        {\n            \"id\": \"C01\",\n            \"type\": \"CAR\",\n            \"length\": 2,\n            \"position\": {\"x\": 1, \"y\": 0},\n            \"orientation\": \"EAST\",\n            \"movementRule\": \"STRAIGHT\"\n        }\n    ],\n    \"obstacles\": []\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{api_endpoint}}",
+							"host": [
+								"{{api_endpoint}}"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "5. Logic Tests",
+			"item": [
+				{
+					"name": "Deadlock Detection",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"const jsonData = pm.response.json();",
+									"",
+									"pm.test(\"Deadlock is correctly detected\", function () {",
+									"    pm.expect(jsonData.solvable).to.be.false;",
+									"});",
+									"",
+									"pm.test(\"Blocking details are provided\", function () {",
+									"    pm.expect(jsonData).to.have.property('blockingDetails');",
+									"    pm.expect(jsonData.blockingDetails).to.be.an('array');",
+									"    pm.expect(jsonData.blockingDetails.length).to.be.greaterThan(0);",
+									"});",
+									"",
+									"pm.test(\"Blocking details have correct structure\", function () {",
+									"    jsonData.blockingDetails.forEach(detail => {",
+									"        pm.expect(detail).to.have.all.keys('blocked', 'blockedBy', 'reason');",
+									"    });",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"levelId\": \"test_deadlock\",\n    \"metadata\": {\n        \"difficulty\": \"hard\",\n        \"targetMoves\": 2\n    },\n    \"grid\": {\n        \"dimensions\": {\"width\": 5, \"height\": 3},\n        \"layout\": [\n            [\"-\", \"-\", \"-\", \"-\", \"-\"],\n            [\"0\", \"0\", \"0\", \"0\", \"0\"],\n            [\"0\", \"0\", \"0\", \"0\", \"0\"]\n        ]\n    },\n    \"vehicles\": [\n        {\n            \"id\": \"C01\",\n            \"type\": \"CAR\",\n            \"length\": 2,\n            \"position\": {\"x\": 1, \"y\": 0},\n            \"orientation\": \"EAST\",\n            \"movementRule\": \"STRAIGHT\"\n        },\n        {\n            \"id\": \"C02\",\n            \"type\": \"CAR\",\n            \"length\": 2,\n            \"position\": {\"x\": 3, \"y\": 0},\n            \"orientation\": \"WEST\",\n            \"movementRule\": \"STRAIGHT\"\n        }\n    ],\n    \"obstacles\": []\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{api_endpoint}}",
+							"host": [
+								"{{api_endpoint}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Boulder Blocking Path",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"const jsonData = pm.response.json();",
+									"",
+									"pm.test(\"Boulder blocks car but not bulldozer\", function () {",
+									"    pm.expect(jsonData.solvable).to.be.false;",
+									"});",
+									"",
+									"pm.test(\"Blocking reason mentions boulder\", function () {",
+									"    const boulderBlocking = jsonData.blockingDetails.some(detail =>",
+									"        detail.blockedBy === 'OB1' || detail.reason.toLowerCase().includes('boulder'));",
+									"    pm.expect(boulderBlocking).to.be.true;",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"levelId\": \"test_boulder_block\",\n    \"metadata\": {\n        \"difficulty\": \"easy\",\n        \"targetMoves\": 1\n    },\n    \"grid\": {\n        \"dimensions\": {\"width\": 5, \"height\": 3},\n        \"layout\": [\n            [\"-\", \"-\", \"-\", \"-\", \"-\"],\n            [\"0\", \"0\", \"0\", \"0\", \"0\"],\n            [\"0\", \"0\", \"0\", \"0\", \"0\"]\n        ]\n    },\n    \"vehicles\": [\n        {\n            \"id\": \"C01\",\n            \"type\": \"CAR\",\n            \"length\": 2,\n            \"position\": {\"x\": 1, \"y\": 0},\n            \"orientation\": \"EAST\",\n            \"movementRule\": \"STRAIGHT\"\n        }\n    ],\n    \"obstacles\": [\n        {\n            \"id\": \"OB1\",\n            \"type\": \"BOULDER\",\n            \"position\": {\"x\": 2, \"y\": 0}\n        }\n    ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{api_endpoint}}",
+							"host": [
+								"{{api_endpoint}}"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "api_endpoint",
+			"value": "https://0hqjjhka5i.execute-api.eu-west-2.amazonaws.com/default/traffic_puzzle_api",
+			"type": "string"
+		},
+		{
+			"key": "simple_response_time",
+			"value": "",
+			"type": "number"
+		}
+	]
+}
