@@ -3,13 +3,13 @@ from typing import Dict, Optional, Set
 from models.enums import CellType, Orientation, Direction, MovementRule
 
 
-@dataclass
+@dataclass(frozen=True)
 class Position:
     x: int
     y: int
     
     def __hash__(self):
-        return hash((self.x, self.y))
+        return (self.x << 16) ^ self.y
     
     def __eq__(self, other):
         return self.x == other.x and self.y == other.y
