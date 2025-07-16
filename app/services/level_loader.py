@@ -5,11 +5,13 @@ from models.obstacles import obstacle_from_dict
 from models.game_state import GameState
 from core.graph_builder import GraphBuilder
 from core.path_calculator import PathCalculator
+from core.graph_cache import GraphCache
 
 
 class LevelLoader:
     """Loads and processes level data from JSON format"""
-    
+    graph_cache = GraphCache()   
+
     def __init__(self):
         self.graph_builder = GraphBuilder()
         self.path_calculator = PathCalculator()
@@ -30,12 +32,15 @@ class LevelLoader:
         width = original_width + 2
         height = original_height + 2
         
-        # Build graph
-        graph = self.graph_builder.build_graph(width, height, layout_with_exits)
-        
-        # Calculate all paths
-        self.path_calculator.calculate_all_paths(graph)
-        
+        # Check cache first and retrieve graph if available 
+        # Create a new graph if not found in cache
+        graph = self.graph_cache.get(layout_with_exits)
+        if not graph:
+            graph = self.graph_builder.build_graph(width, height, layout_with_exits)
+            self.path_calculator.calculate_all_paths(graph)
+            self.graph_cache.put(layout_with_exits, graph)
+
+                
         # Load vehicles (adjust positions for border)
         vehicles = []
         for vehicle_data in level_data.get("vehicles", []):

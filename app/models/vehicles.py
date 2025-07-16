@@ -1,5 +1,5 @@
-from dataclasses import dataclass
-from typing import List, Set
+from dataclasses import dataclass, field
+from typing import List, Set, Optional
 from enum import Enum
 from models.graph import Position
 from models.enums import Orientation, MovementRule
@@ -19,31 +19,33 @@ class Vehicle:
     position: Position  # Head/front position
     orientation: Orientation
     movement_rule: MovementRule
+    _occupied_cells_cache: Optional[List[Position]] = field(default=None, init=False, compare=False)
     
     def get_occupied_cells(self) -> List[Position]:
-        """
-        Calculate all cells this vehicle occupies.
-        The head is at self.position, and the body extends backward based on orientation.
-        """
+        """Calculate all cells this vehicle occupies."""
+        if self._occupied_cells_cache is not None:
+            return self._occupied_cells_cache
+        
         cells = [self.position]
-
-        # Determine the directional offsets based on orientation.
+        
+        # Pre-compute directional offsets
         if self.orientation == Orientation.NORTH:
             delta_x, delta_y = 0, 1
         elif self.orientation == Orientation.SOUTH:
             delta_x, delta_y = 0, -1
         elif self.orientation == Orientation.EAST:
             delta_x, delta_y = -1, 0
-        elif self.orientation == Orientation.WEST:
+        else:  # WEST
             delta_x, delta_y = 1, 0
-        else:
-            raise ValueError("Invalid orientation")
         
-        # Add cells extending from the head based on vehicle length.
+        # Add cells extending from the head
         for i in range(1, self.length):
-            cells.append(Position(self.position.x + delta_x * i,
-                      self.position.y + delta_y * i))
+            cells.append(Position(
+                self.position.x + delta_x * i,
+                self.position.y + delta_y * i
+            ))
         
+        self._occupied_cells_cache = cells
         return cells
     
     def can_clear_obstacles(self) -> bool:

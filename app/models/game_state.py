@@ -1,5 +1,5 @@
 from typing import Dict, List, Set, Optional, Tuple
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from models.vehicles import Vehicle
 from models.obstacles import Obstacle
 from models.graph import Position, RoadGraph
@@ -12,14 +12,35 @@ class GameState:
     obstacles: Dict[Position, Obstacle]
     exited_vehicles: List[str]
     turn_number: int = 0
+    _occupied_cache: Optional[Dict[str, Set[Position]]] = field(default=None, init=False)
+    _occupied_positions_cache: Optional[Set[Position]] = field(default=None, init=False)
+    
+    def __post_init__(self):
+        # Pre-compute occupied positions
+        self._rebuild_cache()
+    
+    def _rebuild_cache(self):
+        """Rebuild the occupied positions cache"""
+        self._occupied_cache = {}
+        all_occupied = set()
+        
+        for vehicle_id, vehicle in self.active_vehicles.items():
+            positions = set(vehicle.get_occupied_cells())
+            self._occupied_cache[vehicle_id] = positions
+            all_occupied.update(positions)
+        
+        self._occupied_positions_cache = all_occupied
     
     def get_occupied_positions(self, exclude_vehicle_id: Optional[str] = None) -> Set[Position]:
         """Get all positions occupied by vehicles (optionally excluding one)"""
-        occupied = set()
-        for vehicle_id, vehicle in self.active_vehicles.items():
-            if vehicle_id != exclude_vehicle_id:
-                occupied.update(vehicle.get_occupied_cells())
-        return occupied
+        if exclude_vehicle_id is None:
+            return self._occupied_positions_cache.copy()
+        
+        # Return all positions except those from excluded vehicle
+        result = self._occupied_positions_cache.copy()
+        if exclude_vehicle_id in self._occupied_cache:
+            result -= self._occupied_cache[exclude_vehicle_id]
+        return result
     
     def get_obstacle_positions(self) -> Set[Position]:
         """Get all positions with obstacles"""

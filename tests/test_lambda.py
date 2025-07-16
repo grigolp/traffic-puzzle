@@ -204,7 +204,7 @@ def test_lambda_with_level_116():
         'headers': {'Content-Type': 'application/json'}
     }
     
-    response = lambda_handler(event, {})
+    # response = lambda_handler(event, {})
     # print("API Gateway Event Response:")
     # print(f"Status: {response['statusCode']}")
     # print(f"Body: {response['body']}")
@@ -212,8 +212,8 @@ def test_lambda_with_level_116():
     # Test as direct invocation
     # print("\n\nDirect Invocation Response:")
     response = lambda_handler(level_data, {})
-    # print(f"Status: {response['statusCode']}")
-    # print(f"Body: {response['body']}")
+    print(f"Status: {response['statusCode']}")
+    print(f"Body: {response['body']}")
 
 
 def test_invalid_json():
@@ -230,10 +230,17 @@ def test_invalid_json():
 
 
 if __name__ == "__main__":
-    import time
-    print("Running Lambda tests...")
-    start_time = time.time()
+    import cProfile
+    import pstats
+    from pstats import SortKey
     test_lambda_with_level_116()
-    end_time = time.time()
-    print(f"\nTests completed in {end_time - start_time:.2f} seconds")
+
     
+    profiler = cProfile.Profile()
+    profiler.enable()
+    test_lambda_with_level_116()
+    profiler.disable()
+
+    stats = pstats.Stats(profiler)
+    stats.sort_stats(SortKey.TIME)
+    stats.print_stats() 

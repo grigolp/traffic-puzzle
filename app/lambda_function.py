@@ -1,4 +1,5 @@
 import json
+import time
 from services.validator import validate_level
 
 def lambda_handler(event, context):
@@ -16,18 +17,20 @@ def lambda_handler(event, context):
 
         # Handle different event sources (API Gateway, direct invocation, etc.)
         if isinstance(event.get('body'), str):
-            # API Gateway sends body as string
             body = json.loads(event['body'])
         elif isinstance(event.get('body'), dict):
-            # Direct invocation might have dict
             body = event['body']
         else:
-            # Direct invocation with level data at root
             body = event
-        
-        # Validate level
+
+        # Time the validation
+        start_time = time.perf_counter()
         result = validate_level(body)
-        
+        duration_ms = round((time.perf_counter() - start_time) * 1000, 3)  # milliseconds with precision
+
+        # Include timing in response
+        result['executionTimeMs'] = duration_ms
+
         # Determine status code
         if 'error' in result:
             if result['error']['code'] == 'INVALID_REQUEST':
@@ -38,8 +41,7 @@ def lambda_handler(event, context):
                 status_code = 500
         else:
             status_code = 200
-        
-        # Return response in API Gateway format
+
         return {
             'statusCode': status_code,
             'headers': {
@@ -48,7 +50,7 @@ def lambda_handler(event, context):
             },
             'body': json.dumps(result)
         }
-        
+
     except json.JSONDecodeError:
         return {
             'statusCode': 400,
